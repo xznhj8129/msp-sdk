@@ -4,6 +4,8 @@ Unified SDK for INAV:
 * Arduino/PIO
 * C++
 
+# WIP, does not work yet
+
 
 ## Generation process:
 
