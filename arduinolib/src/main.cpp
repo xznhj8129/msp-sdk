@@ -141,8 +141,8 @@ void setup() {
     inav_nav_waypoint w1{};
     w1.waypointIndex = 1; // mission waypoints start at 1; 0 is RTH/home
     w1.action        = NAV_WP_ACTION_WAYPOINT;
-    w1.latitude      = 40.7128000;
-    w1.longitude     = -74.0060000;
+    w1.latitude      = 40.123000;
+    w1.longitude     = -74.1230000;
     w1.altitude      = 50.0f;
     w1.param1        = 500; // cm/s
     w1.param2 = w1.param3 = 0;
