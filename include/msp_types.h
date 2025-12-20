@@ -1,0 +1,213 @@
+// Auto-generated minimal types and stubs needed by msp_messages.h
+#pragma once
+#include <stdint.h>
+
+#ifndef BIT
+#define BIT(x) (1U << (x))
+#endif
+
+#ifndef MSP_HAS_ESC_SENSOR_DATA_T
+#define MSP_HAS_ESC_SENSOR_DATA_T
+typedef struct __attribute__((packed)) {
+    uint8_t dataAge;
+    int16_t temperature;
+    int16_t voltage;
+    int32_t current;
+    uint32_t rpm;
+} escSensorData_t;
+#endif
+
+#ifndef MSP_HAS_LED_CONFIG_T
+#define MSP_HAS_LED_CONFIG_T
+typedef struct __attribute__((packed)) {
+    uint8_t raw[6];
+} ledConfig_t;
+#endif
+
+#ifndef MSP_HAS_FW_AUTOTUNE_RATE_ADJUSTMENT_E
+#define MSP_HAS_FW_AUTOTUNE_RATE_ADJUSTMENT_E
+typedef enum {
+    FW_AUTOTUNE_RATE_ADJ_FIXED = 0,
+    FW_AUTOTUNE_RATE_ADJ_LIMIT = 1,
+    FW_AUTOTUNE_RATE_ADJ_AUTO = 2,
+} fw_autotune_rate_adjustment_e;
+#endif
+
+#ifndef MSP_HAS_VARIES_T
+#define MSP_HAS_VARIES_T
+typedef uint8_t Varies;
+#endif
+
+#ifndef MSP_HAS_NAV_USER_CONTROL_MODE_E
+#define MSP_HAS_NAV_USER_CONTROL_MODE_E
+typedef uint8_t navUserControlMode_e;
+#endif
+
+#ifndef MSP_HAS_NAV_RTH_ALT_CONTROL_MODE_E
+#define MSP_HAS_NAV_RTH_ALT_CONTROL_MODE_E
+typedef uint8_t navRthAltControlMode_e;
+#endif
+
+#ifndef MSP_HAS_MIXER_PRESET_E
+#define MSP_HAS_MIXER_PRESET_E
+typedef uint16_t mixerPreset_e;
+#endif
+
+#ifndef MSP_HAS_BOXBITMASK_T
+#define MSP_HAS_BOXBITMASK_T
+#ifdef CHECKBOX_ITEM_COUNT
+#define MSP_BOXBITMASK_WORDS ((CHECKBOX_ITEM_COUNT + 31) / 32)
+#else
+#define MSP_BOXBITMASK_WORDS ((60 + 31) / 32)
+#endif
+typedef struct {
+    uint32_t bits[MSP_BOXBITMASK_WORDS];
+} boxBitmask_t;
+#undef MSP_BOXBITMASK_WORDS
+#endif
+
+// Defines
+#ifndef MAX_PROGRAMMING_PID_COUNT
+#define MAX_PROGRAMMING_PID_COUNT 4
+#endif
+#ifndef TEMPERATURE_LABEL_LEN
+#define TEMPERATURE_LABEL_LEN 4
+#endif
+#ifndef ADSB_CALL_SIGN_MAX_LENGTH
+#define ADSB_CALL_SIGN_MAX_LENGTH 9
+#endif
+#ifndef BUILD_DATE_LENGTH
+#define BUILD_DATE_LENGTH 11
+#endif
+#ifndef BUILD_TIME_LENGTH
+#define BUILD_TIME_LENGTH 8
+#endif
+#ifndef GIT_SHORT_REVISION_LENGTH
+#define GIT_SHORT_REVISION_LENGTH   8
+#endif
+#ifndef MAX_MAPPABLE_RX_INPUTS
+#define MAX_MAPPABLE_RX_INPUTS 4
+#endif
+#ifndef MAX_LOGIC_CONDITIONS
+#define MAX_LOGIC_CONDITIONS 64
+#endif
+#ifndef MAX_GLOBAL_VARIABLES
+#define MAX_GLOBAL_VARIABLES 8
+#endif
+#ifndef CUSTOM_ELEMENTS_PARTS
+#define CUSTOM_ELEMENTS_PARTS 3
+#endif
+#ifndef MAX_SUPPORTED_SERVOS
+#define MAX_SUPPORTED_SERVOS 18
+#endif
+#ifndef MAX_SUPPORTED_MOTORS
+#define MAX_SUPPORTED_MOTORS 18
+#endif
+#ifndef MAX_SUPPORTED_RC_CHANNEL_COUNT
+#define MAX_SUPPORTED_RC_CHANNEL_COUNT 34
+#endif
+#ifndef MAX_RC_CHANNELS
+#define MAX_RC_CHANNELS 18
+#endif
+#ifndef MAX_SUPPORTED_CHANNELS
+#define MAX_SUPPORTED_CHANNELS 18
+#endif
+#ifndef MAX_MODE_RANGES
+#define MAX_MODE_RANGES 40
+#endif
+#ifndef MAX_BOX_IDS
+#define MAX_BOX_IDS 70
+#endif
+#ifndef NAV_MAX_WAYPOINTS
+#define NAV_MAX_WAYPOINTS 120
+#endif
+#ifndef BOARD_INFO_FIXED_SIZE
+#define BOARD_INFO_FIXED_SIZE (4 + 2 + 1 + 1 + 1)
+#endif
+#ifndef MAX_NAME_LENGTH
+#define MAX_NAME_LENGTH 47
+#endif
+#ifndef MAX_GVARS
+#define MAX_GVARS 16
+#endif
+#ifndef MAX_SERVO_RULES
+#define MAX_SERVO_RULES (2 * MAX_SUPPORTED_SERVOS)
+#endif
+#ifndef MAX_SERVO_SPEED
+#define MAX_SERVO_SPEED UINT8_MAX
+#endif
+#ifndef SERVO_OUTPUT_MAX
+#define SERVO_OUTPUT_MAX 2500
+#endif
+#ifndef SERVO_OUTPUT_MIN
+#define SERVO_OUTPUT_MIN 500
+#endif
+#ifndef NON_AUX_CHANNEL_COUNT
+#define NON_AUX_CHANNEL_COUNT 4
+#endif
+#ifndef MAX_AUX_CHANNEL_COUNT
+#define MAX_AUX_CHANNEL_COUNT (MAX_SUPPORTED_RC_CHANNEL_COUNT - NON_AUX_CHANNEL_COUNT)
+#endif
+#ifndef MAX_INVALID_RX_PULSE_TIME
+#define MAX_INVALID_RX_PULSE_TIME    300
+#endif
+#ifndef RSSI_VISIBLE_VALUE_MIN
+#define RSSI_VISIBLE_VALUE_MIN 0
+#endif
+#ifndef RSSI_VISIBLE_VALUE_MAX
+#define RSSI_VISIBLE_VALUE_MAX 100
+#endif
+#ifndef STICK_CHANNEL_COUNT
+#define STICK_CHANNEL_COUNT 4
+#endif
+#ifndef PWM_RANGE_MIN
+#define PWM_RANGE_MIN 1000
+#endif
+#ifndef PWM_RANGE_MAX
+#define PWM_RANGE_MAX 2000
+#endif
+#ifndef PWM_RANGE_MIDDLE
+#define PWM_RANGE_MIDDLE (PWM_RANGE_MIN + ((PWM_RANGE_MAX - PWM_RANGE_MIN) / 2))
+#endif
+#ifndef PWM_PULSE_MIN
+#define PWM_PULSE_MIN   750
+#endif
+#ifndef PWM_PULSE_MAX
+#define PWM_PULSE_MAX   2250
+#endif
+#ifndef MIDRC_MIN
+#define MIDRC_MIN 1200
+#endif
+#ifndef MIDRC_MAX
+#define MIDRC_MAX 1700
+#endif
+#ifndef OSD_CHAR_BYTES
+#define OSD_CHAR_BYTES 64
+#endif
+#ifndef OSD_CUSTOM_ELEMENT_TEXT_SIZE
+#define OSD_CUSTOM_ELEMENT_TEXT_SIZE 16
+#endif
+#ifndef DEBUG32_VALUE_COUNT
+#define DEBUG32_VALUE_COUNT 8
+#endif
+#ifndef OSD_CHAR_BITS_PER_PIXEL
+#define OSD_CHAR_BITS_PER_PIXEL 2
+#endif
+#ifndef OSD_CHAR_HEIGHT
+#define OSD_CHAR_HEIGHT 18
+#endif
+#ifndef OSD_CHAR_WIDTH
+#define OSD_CHAR_WIDTH 12
+#endif
+#ifndef OSD_CHAR_VISIBLE_BYTES
+#define OSD_CHAR_VISIBLE_BYTES (OSD_CHAR_WIDTH * OSD_CHAR_HEIGHT * OSD_CHAR_BITS_PER_PIXEL / 8)
+#endif
+#ifndef SETTING_TYPE_OFFSET
+#define SETTING_TYPE_OFFSET 0
+#endif
+#ifndef SETTING_SECTION_OFFSET
+#define SETTING_SECTION_OFFSET 3
+#endif
+#ifndef SETTING_MODE_OFFSET
+#define SETTING_MODE_OFFSET 6
+#endif
