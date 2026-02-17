@@ -1,7 +1,0 @@
-#!/bin/bash
-set -euo pipefail
-
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export PLATFORMIO_CORE_DIR="$ROOT/.pio-home"
-
-exec "$HOME/.platformio/penv/bin/pio" "$@"

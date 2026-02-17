@@ -208,4 +208,5 @@ inav_*_SITL
 *.bin
 .trash
 sitldiff.txt
-out.log
+*.log
+*.o
