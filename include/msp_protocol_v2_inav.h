@@ -17,7 +17,6 @@
 
 // INAV specific IDs start from 0x2000
 // See https://github.com/iNavFlight/inav/wiki/MSP-V2#msp-v2-message-catalogue
-#pragma once
 
 #define MSP2_INAV_STATUS                        0x2000
 #define MSP2_INAV_OPTICAL_FLOW                  0x2001
@@ -46,6 +45,8 @@
 #define MSP2_INAV_OSD_SET_ALARMS                0x2015
 #define MSP2_INAV_OSD_PREFERENCES               0x2016
 #define MSP2_INAV_OSD_SET_PREFERENCES           0x2017
+
+#define MSP2_INAV_OSD_UPDATE_POSITION           0x2118
 
 #define MSP2_INAV_SELECT_BATTERY_PROFILE        0x2018
 
@@ -88,6 +89,7 @@
 
 #define MSP2_INAV_MISC2                         0x203A
 #define MSP2_INAV_LOGIC_CONDITIONS_SINGLE       0x203B
+#define MSP2_INAV_LOGIC_CONDITIONS_CONFIGURED   0x203C  // Returns 8-byte bitmask of non-default logic conditions
 
 #define MSP2_INAV_ESC_RPM                       0x2040
 #define MSP2_INAV_ESC_TELEM                     0x2041
@@ -117,7 +119,18 @@
 #define MSP2_INAV_SERVO_CONFIG                  0x2200
 #define MSP2_INAV_SET_SERVO_CONFIG              0x2201
 
-#define MSP2_INAV_GEOZONE                      0x2210
-#define MSP2_INAV_SET_GEOZONE                  0x2211
-#define MSP2_INAV_GEOZONE_VERTEX               0x2212
-#define MSP2_INAV_SET_GEOZONE_VERTEX           0x2213
+#define MSP2_INAV_GEOZONE                       0x2210
+#define MSP2_INAV_SET_GEOZONE                   0x2211
+#define MSP2_INAV_GEOZONE_VERTEX                0x2212
+#define MSP2_INAV_SET_GEOZONE_VERTEX            0x2213
+#define MSP2_INAV_SET_GVAR                      0x2214
+
+#define MSP2_INAV_SET_ALT_TARGET                0x2215
+#define MSP2_INAV_FLIGHT_AXIS_ANGLE_OVERRIDE    0x2216
+#define MSP2_INAV_FLIGHT_AXIS_RATE_OVERRIDE     0x2217
+#define MSP2_INAV_SET_LOCAL_TARGET              0x2218
+#define MSP2_INAV_LOCAL_TARGET                  0x2219
+#define MSP2_INAV_SET_GLOBAL_TARGET             0x221A
+#define MSP2_INAV_NAV_TARGET                    0x221B
+
+#define MSP2_INAV_FULL_LOCAL_POSE               0x2220
