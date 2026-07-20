@@ -1,20 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-INAV_SRC_PATH="${INAV_SRC_PATH:-${1:-}}"
-: "${INAV_SRC_PATH:?Set INAV_SRC_PATH or pass it as first argument}"
+INAV_DIR="${1:?Usage: include/sync.sh PATH_TO_INAV}"
+INCLUDE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cp "${INAV_DIR}/src/main/msp/msp_protocol.h" "${INCLUDE_DIR}/msp_protocol.h"
+cp "${INAV_DIR}/src/main/msp/msp_protocol_v2_common.h" "${INCLUDE_DIR}/msp_protocol_v2_common.h"
+cp "${INAV_DIR}/src/main/msp/msp_protocol_v2_inav.h" "${INCLUDE_DIR}/msp_protocol_v2_inav.h"
+cp "${INAV_DIR}/src/main/msp/msp_protocol_v2_sensor.h" "${INCLUDE_DIR}/msp_protocol_v2_sensor.h"
+cp "${INAV_DIR}/src/main/msp/msp_protocol_v2_sensor_msg.h" "${INCLUDE_DIR}/msp_protocol_v2_sensor_msg.h"
 
-cp "${INAV_SRC_PATH}/src/main/msp/msp_protocol.h" "${SCRIPT_DIR}/msp_protocol.h"
-cp "${INAV_SRC_PATH}/src/main/msp/msp_protocol_v2_common.h" "${SCRIPT_DIR}/msp_protocol_v2_common.h"
-cp "${INAV_SRC_PATH}/src/main/msp/msp_protocol_v2_inav.h" "${SCRIPT_DIR}/msp_protocol_v2_inav.h"
-cp "${INAV_SRC_PATH}/src/main/msp/msp_protocol_v2_sensor.h" "${SCRIPT_DIR}/msp_protocol_v2_sensor.h"
-cp "${INAV_SRC_PATH}/src/main/msp/msp_protocol_v2_sensor_msg.h" "${SCRIPT_DIR}/msp_protocol_v2_sensor_msg.h"
+cp "${INAV_DIR}/docs/development/msp/msp_messages.json" "${INCLUDE_DIR}/msp_messages.json"
+cp "${INAV_DIR}/docs/development/msp/inav_enums.json" "${INCLUDE_DIR}/inav_enums.json"
 
-cp "${INAV_SRC_PATH}/docs/development/msp/msp_messages.json" "${SCRIPT_DIR}/msp_messages.json"
-cp "${INAV_SRC_PATH}/docs/development/msp/inav_enums.json" "${SCRIPT_DIR}/inav_enums.json"
-cp "${INAV_SRC_PATH}/docs/development/msp/all_enums.h" "${SCRIPT_DIR}/all_enums.h"
-
-cp "${INAV_SRC_PATH}/src/main/common/bitarray.c" "${SCRIPT_DIR}/bitarray.c"
-cp "${INAV_SRC_PATH}/src/main/common/bitarray.h" "${SCRIPT_DIR}/bitarray.h"
+cp "${INAV_DIR}/src/main/common/bitarray.c" "${INCLUDE_DIR}/bitarray.c"
+cp "${INAV_DIR}/src/main/common/bitarray.h" "${INCLUDE_DIR}/bitarray.h"

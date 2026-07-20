@@ -1,6 +1,5 @@
 // Minimal demo: pack/unpack a couple of MSP messages and show layout/bytes.
-#include "msp_types.h"
-#include "msp_messages.h"
+#include <msp_messages.h>
 
 #include <cstdio>
 #include <cstring>
@@ -9,6 +8,12 @@ struct NonPackedExample {
     uint8_t a;
     uint16_t b;
 };
+
+static_assert(sizeof(escSensorData_t) == 16, "escSensorData_t wire layout changed");
+static_assert(sizeof(dronecanNodeStatus_t) == 7, "dronecanNodeStatus_t wire layout changed");
+static_assert(sizeof(MSP_NAV_POSHOLD_reply_t) == 13, "enum metadata changed the MSP wire layout");
+static_assert(sizeof(MSP2_INAV_ESC_TELEM_reply_t) == 17, "variable ESC placeholder layout changed");
+static_assert(sizeof(MSP2_INAV_DRONECAN_NODES_reply_t) == 8, "variable DroneCAN placeholder layout changed");
 
 static void dump_bytes(const char *label, const uint8_t *data, size_t len) {
     std::printf("%s (len=%zu):", label, len);

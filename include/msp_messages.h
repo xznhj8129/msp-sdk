@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include "msp_protocol.h"
 #include "msp_types.h"
-#include "all_enums.h"
 
 #if !defined(MSP_PROTOCOL_VERSION)
 # error "msp_protocol.h must be present and define protocol macros"
@@ -27,7 +26,7 @@
 // Provides the MSP protocol version and the INAV API version.
 // Notes: Used by configurators to check compatibility.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t mspProtocolVersion;  // MSP Protocol version (`MSP_PROTOCOL_VERSION`, typically 0)
     uint8_t apiVersionMajor;  // INAV API Major version (`API_VERSION_MAJOR`)
     uint8_t apiVersionMinor;  // INAV API Minor version (`API_VERSION_MINOR`)
@@ -37,14 +36,14 @@ typedef struct __attribute__((packed)) {
 // Identifies the flight controller firmware variant (e.g., INAV, Betaflight).
 // Notes: See `FLIGHT_CONTROLLER_IDENTIFIER_LENGTH`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     char fcVariantIdentifier[4];  // 4-character identifier string (e.g., "INAV"). Defined by `flightControllerIdentifier`.
 } MSP_FC_VARIANT_reply_t;
 
 // MSP_FC_VERSION (MSPv1)
 // Provides the specific version number of the flight controller firmware.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t fcVersionMajor;  // Firmware Major version (`FC_VERSION_MAJOR`)
     uint8_t fcVersionMinor;  // Firmware Minor version (`FC_VERSION_MINOR`)
     uint8_t fcVersionPatch;  // Firmware Patch level (`FC_VERSION_PATCH_LEVEL`)
@@ -54,7 +53,7 @@ typedef struct __attribute__((packed)) {
 // Provides information about the specific hardware board and its capabilities.
 // Notes: `BOARD_IDENTIFIER_LENGTH` is 4.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     char boardIdentifier[4];  // 4-character UPPER CASE board identifier (`TARGET_BOARD_IDENTIFIER`)
     uint16_t hardwareRevision;  // Hardware revision number. 0 if not detected (`USE_HARDWARE_REVISION_DETECTION`)
     uint8_t osdSupport;  // OSD chip type: 0=None, 2=Onboard (`USE_OSD`). INAV does not support slave OSD (1)
@@ -66,7 +65,7 @@ typedef struct __attribute__((packed)) {
 // MSP_BUILD_INFO (MSPv1)
 // Provides build date, time, and Git revision of the firmware.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     char buildDate[BUILD_DATE_LENGTH];  // Build date string (e.g., "Dec 31 2023"). `BUILD_DATE_LENGTH`. | length via BUILD_DATE_LENGTH
     char buildTime[BUILD_TIME_LENGTH];  // Build time string (e.g., "23:59:59"). `BUILD_TIME_LENGTH`. | length via BUILD_TIME_LENGTH
     char gitRevision[GIT_SHORT_REVISION_LENGTH];  // Short Git revision string. `GIT_SHORT_REVISION_LENGTH`. | length via GIT_SHORT_REVISION_LENGTH
@@ -76,7 +75,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves legacy INAV-specific PID controller related settings. Many fields are now obsolete or placeholders.
 // Notes: Superseded by `MSP2_PID` for core PIDs and other specific messages for filter settings.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t legacyAsyncProcessing;  // Legacy, unused. Always 0
     uint16_t legacyAsyncValue1;  // Legacy, unused. Always 0
     int16_t legacyAsyncValue2;  // Legacy, unused. Always 0
@@ -95,7 +94,7 @@ typedef struct __attribute__((packed)) {
 // Sets legacy INAV-specific PID controller related settings.
 // Notes: Expects 15 bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t legacyAsyncProcessing;  // Legacy, ignored
     int16_t legacyAsyncValue1;  // Legacy, ignored
     int16_t legacyAsyncValue2;  // Legacy, ignored
@@ -113,7 +112,7 @@ typedef struct __attribute__((packed)) {
 // MSP_NAME (MSPv1)
 // Returns the user-defined craft name.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     char craftName[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // The craft name string (`systemConfig()->craftName`). Null termination is *not* explicitly sent, the length is determined by the payload size
 } MSP_NAME_reply_t;
 
@@ -121,21 +120,21 @@ typedef struct __attribute__((packed)) {
 // Sets the user-defined craft name.
 // Notes: Maximum length is `MAX_NAME_LENGTH`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     char craftName[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // The new craft name string. Automatically null-terminated by the FC
 } MSP_SET_NAME_request_t;
 
 // MSP_NAV_POSHOLD (MSPv1)
 // Retrieves navigation position hold and general manual/auto flight parameters. Some parameters depend on the platform type (Multirotor vs Fixed Wing).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t userControlMode;  // Navigation user control mode NAV_GPS_ATTI (0) or NAV_GPS_CRUISE (1)
     uint16_t maxAutoSpeed;  // Max speed in autonomous modes (`navConfig()->general.max_auto_speed`) | units: cm/s
     uint16_t maxAutoClimbRate;  // Max climb rate in autonomous modes (uses `fw.max_auto_climb_rate` or `mc.max_auto_climb_rate` based on platform) | units: cm/s
     uint16_t maxManualSpeed;  // Max speed in manual modes with GPS aiding (`navConfig()->general.max_manual_speed`) | units: cm/s
     uint16_t maxManualClimbRate;  // Max climb rate in manual modes with GPS aiding (uses `fw.max_manual_climb_rate` or `mc.max_manual_climb_rate`) | units: cm/s
     uint8_t mcMaxBankAngle;  // Max bank angle for multirotor position hold (`navConfig()->mc.max_bank_angle`) | units: degrees
-    navMcAltHoldThrottle_e mcAltHoldThrottleType;  // Enum `navMcAltHoldThrottle_e` mirrored from `navConfig()->mc.althold_throttle_type`. | units: Enum | Enum: navMcAltHoldThrottle_e
+    uint8_t mcAltHoldThrottleType;  // Enum `navMcAltHoldThrottle_e` mirrored from `navConfig()->mc.althold_throttle_type`. | units: Enum | Enum: navMcAltHoldThrottle_e
     uint16_t mcHoverThrottle;  // Multirotor hover throttle PWM value (`currentBatteryProfile->nav.mc.hover_throttle`). | units: PWM
 } MSP_NAV_POSHOLD_reply_t;
 
@@ -143,14 +142,14 @@ typedef struct __attribute__((packed)) {
 // Sets navigation position hold and general manual/auto flight parameters.
 // Notes: Expects 13 bytes.
 
-typedef struct __attribute__((packed)) {
-    navUserControlMode_e userControlMode;  // Sets `navConfigMutable()->general.flags.user_control_mode`. WARNING: uses unnamed enum in navigation.h 'NAV_GPS_ATTI/NAV_GPS_CRUISE' | units: Enum | Enum: navUserControlMode_e
+typedef struct MSP_PACKED {
+    uint8_t userControlMode;  // Sets `navConfigMutable()->general.flags.user_control_mode`. WARNING: uses unnamed enum in navigation.h 'NAV_GPS_ATTI/NAV_GPS_CRUISE' | units: Enum | Enum: navUserControlMode_e
     uint16_t maxAutoSpeed;  // Sets `navConfigMutable()->general.max_auto_speed`. | units: cm/s
     uint16_t maxAutoClimbRate;  // Sets `navConfigMutable()->fw.max_auto_climb_rate` or `navConfigMutable()->mc.max_auto_climb_rate` based on `mixerConfig()->platformType`. | units: cm/s
     uint16_t maxManualSpeed;  // Sets `navConfigMutable()->general.max_manual_speed`. | units: cm/s
     uint16_t maxManualClimbRate;  // Sets `navConfigMutable()->fw.max_manual_climb_rate` or `navConfigMutable()->mc.max_manual_climb_rate`. | units: cm/s
     uint8_t mcMaxBankAngle;  // Sets `navConfigMutable()->mc.max_bank_angle`. | units: degrees
-    navMcAltHoldThrottle_e mcAltHoldThrottleType;  // Enum `navMcAltHoldThrottle_e`; updates `navConfigMutable()->mc.althold_throttle_type`. | units: Enum | Enum: navMcAltHoldThrottle_e
+    uint8_t mcAltHoldThrottleType;  // Enum `navMcAltHoldThrottle_e`; updates `navConfigMutable()->mc.althold_throttle_type`. | units: Enum | Enum: navMcAltHoldThrottle_e
     uint16_t mcHoverThrottle;  // Sets `currentBatteryProfileMutable->nav.mc.hover_throttle`. | units: PWM
 } MSP_SET_NAV_POSHOLD_request_t;
 
@@ -158,7 +157,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves sensor calibration data (Accelerometer zero/gain, Magnetometer zero/gain, Optical Flow scale).
 // Notes: Total size 27 bytes. Fields related to optional sensors are zero if the sensor is not used.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t accCalibAxisFlags;  // Bitmask: Flags indicating which axes of the accelerometer have been calibrated (`accGetCalibrationAxisFlags()`) | units: Bitmask
     int16_t accZeroX;  // Accelerometer zero offset for X-axis (`accelerometerConfig()->accZero.raw[X]`) | units: Raw ADC
     int16_t accZeroY;  // Accelerometer zero offset for Y-axis (`accelerometerConfig()->accZero.raw[Y]`) | units: Raw ADC
@@ -179,7 +178,7 @@ typedef struct __attribute__((packed)) {
 // Sets sensor calibration data.
 // Notes: Minimum payload 18 bytes. Adds +6 bytes for magnetometer zeros, +2 for optical flow scale, and +6 for magnetometer gains when those features (`USE_MAG`, `USE_OPFLOW`) are compiled in.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t accZeroX;  // Sets `accelerometerConfigMutable()->accZero.raw[X]`. | units: Raw ADC
     int16_t accZeroY;  // Sets `accelerometerConfigMutable()->accZero.raw[Y]`. | units: Raw ADC
     int16_t accZeroZ;  // Sets `accelerometerConfigMutable()->accZero.raw[Z]`. | units: Raw ADC
@@ -198,7 +197,7 @@ typedef struct __attribute__((packed)) {
 // MSP_POSITION_ESTIMATION_CONFIG (MSPv1)
 // Retrieves parameters related to the INAV position estimation fusion weights and GPS minimum satellite count.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t weightZBaroP;  // Barometer Z position fusion weight (`positionEstimationConfig()->w_z_baro_p * 100`) | units: Weight * 100
     uint16_t weightZGPSP;  // GPS Z position fusion weight (`positionEstimationConfig()->w_z_gps_p * 100`) | units: Weight * 100
     uint16_t weightZGPSV;  // GPS Z velocity fusion weight (`positionEstimationConfig()->w_z_gps_v * 100`) | units: Weight * 100
@@ -212,7 +211,7 @@ typedef struct __attribute__((packed)) {
 // Sets parameters related to the INAV position estimation fusion weights and GPS minimum satellite count.
 // Notes: Expects 12 bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t weightZBaroP;  // Sets `positionEstimationConfigMutable()->w_z_baro_p = value / 100.0f` (constrained 0.0-10.0) | units: Weight * 100
     uint16_t weightZGPSP;  // Sets `positionEstimationConfigMutable()->w_z_gps_p = value / 100.0f` (constrained 0.0-10.0) | units: Weight * 100
     uint16_t weightZGPSV;  // Sets `positionEstimationConfigMutable()->w_z_gps_v = value / 100.0f` (constrained 0.0-10.0) | units: Weight * 100
@@ -226,7 +225,7 @@ typedef struct __attribute__((packed)) {
 // Commands the FC to load the waypoint mission stored in non-volatile memory (e.g., EEPROM or FlashFS) into the active mission buffer.
 // Notes: Only functional if `NAV_NON_VOLATILE_WAYPOINT_STORAGE` is defined. Requires 1 byte payload. Returns error if loading fails.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t missionID;  // Reserved for future use, currently ignored
 } MSP_WP_MISSION_LOAD_request_t;
 
@@ -234,14 +233,14 @@ typedef struct __attribute__((packed)) {
 // Commands the FC to save the currently active waypoint mission from RAM to non-volatile memory (e.g., EEPROM or FlashFS).
 // Notes: Only functional if `NAV_NON_VOLATILE_WAYPOINT_STORAGE` is defined. Requires 1 byte payload. Returns error if saving fails.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t missionID;  // Reserved for future use, currently ignored
 } MSP_WP_MISSION_SAVE_request_t;
 
 // MSP_WP_GETINFO (MSPv1)
 // Retrieves information about the waypoint mission capabilities and the status of the currently loaded mission.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t wpCapabilities;  // Reserved for future waypoint capabilities flags. Currently always 0
     uint8_t maxWaypoints;  // Maximum number of waypoints supported (`NAV_MAX_WAYPOINTS`)
     uint8_t missionValid;  // Boolean flag indicating if the current mission in RAM is valid (`isWaypointListValid()`)
@@ -251,13 +250,13 @@ typedef struct __attribute__((packed)) {
 // MSP_RTH_AND_LAND_CONFIG (MSPv1)
 // Retrieves configuration parameters related to Return-to-Home (RTH) and automatic landing behaviors.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t minRthDistance;  // Minimum distance from home required for RTH to engage (`navConfig()->general.min_rth_distance`) | units: cm
     uint8_t rthClimbFirst;  // Flag: Climb to RTH altitude before returning (`navConfig()->general.flags.rth_climb_first`) | units: Boolean
     uint8_t rthClimbIgnoreEmerg;  // Flag: Climb even in emergency RTH (`navConfig()->general.flags.rth_climb_ignore_emerg`) | units: Boolean
     uint8_t rthTailFirst;  // Flag: Return tail-first during RTH (`navConfig()->general.flags.rth_tail_first`) | units: Boolean
     uint8_t rthAllowLanding;  // Flag: Allow automatic landing after RTH (`navConfig()->general.flags.rth_allow_landing`) | units: Boolean
-    navRthAltControlMode_e rthAltControlMode;  // RTH altitude control mode (`navConfig()->general.flags.rth_alt_control_mode`). WARNING: uses unnamed enum in navigation.h:253 'NAV_RTH_NO_ALT...' | units: Enum | Enum: navRthAltControlMode_e
+    uint8_t rthAltControlMode;  // RTH altitude control mode (`navConfig()->general.flags.rth_alt_control_mode`). WARNING: uses unnamed enum in navigation.h:253 'NAV_RTH_NO_ALT...' | units: Enum | Enum: navRthAltControlMode_e
     uint16_t rthAbortThreshold;  // Distance increase threshold to abort RTH (`navConfig()->general.rth_abort_threshold`) | units: cm
     uint16_t rthAltitude;  // Target RTH altitude (`navConfig()->general.rth_altitude`) | units: cm
     uint16_t landMinAltVspd;  // Landing vertical speed at minimum slowdown altitude (`navConfig()->general.land_minalt_vspd`) | units: cm/s
@@ -271,13 +270,13 @@ typedef struct __attribute__((packed)) {
 // Sets configuration parameters related to Return-to-Home (RTH) and automatic landing behaviors.
 // Notes: Expects 21 bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t minRthDistance;  // Sets `navConfigMutable()->general.min_rth_distance`. | units: cm
     uint8_t rthClimbFirst;  // Sets `navConfigMutable()->general.flags.rth_climb_first`. | units: Boolean
     uint8_t rthClimbIgnoreEmerg;  // Sets `navConfigMutable()->general.flags.rth_climb_ignore_emerg`. | units: Boolean
     uint8_t rthTailFirst;  // Sets `navConfigMutable()->general.flags.rth_tail_first`. | units: Boolean
     uint8_t rthAllowLanding;  // Sets `navConfigMutable()->general.flags.rth_allow_landing`. | units: Boolean
-    navRthAltControlMode_e rthAltControlMode;  // Sets `navConfigMutable()->general.flags.rth_alt_control_mode`. WARNING: uses unnamed enum in navigation.h:253 | units: Enum | Enum: navRthAltControlMode_e
+    uint8_t rthAltControlMode;  // Sets `navConfigMutable()->general.flags.rth_alt_control_mode`. WARNING: uses unnamed enum in navigation.h:253 | units: Enum | Enum: navRthAltControlMode_e
     uint16_t rthAbortThreshold;  // Sets `navConfigMutable()->general.rth_abort_threshold`. | units: cm
     uint16_t rthAltitude;  // Sets `navConfigMutable()->general.rth_altitude`. | units: cm
     uint16_t landMinAltVspd;  // Sets `navConfigMutable()->general.land_minalt_vspd`. | units: cm/s
@@ -290,7 +289,7 @@ typedef struct __attribute__((packed)) {
 // MSP_FW_CONFIG (MSPv1)
 // Retrieves configuration parameters specific to Fixed Wing navigation.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t cruiseThrottle;  // Cruise throttle command (`currentBatteryProfile->nav.fw.cruise_throttle`). | units: PWM
     uint16_t minThrottle;  // Minimum throttle during autonomous flight (`currentBatteryProfile->nav.fw.min_throttle`). | units: PWM
     uint16_t maxThrottle;  // Maximum throttle during autonomous flight (`currentBatteryProfile->nav.fw.max_throttle`). | units: PWM
@@ -305,7 +304,7 @@ typedef struct __attribute__((packed)) {
 // Sets configuration parameters specific to Fixed Wing navigation.
 // Notes: Expects 12 bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t cruiseThrottle;  // Sets `currentBatteryProfileMutable->nav.fw.cruise_throttle`. | units: PWM
     uint16_t minThrottle;  // Sets `currentBatteryProfileMutable->nav.fw.min_throttle`. | units: PWM
     uint16_t maxThrottle;  // Sets `currentBatteryProfileMutable->nav.fw.max_throttle`. | units: PWM
@@ -320,7 +319,7 @@ typedef struct __attribute__((packed)) {
 // Returns all defined mode activation ranges (aux channel assignments for flight modes).
 // Notes: The number of steps and mapping to PWM values depends on internal range calculations.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t modePermanentId;  // Permanent ID of the flight mode (maps to `boxId` via `findBoxByActiveBoxId`). 0 if entry unused | units: ID
     uint8_t auxChannelIndex;  // 0-based index of the AUX channel used for activation | units: Index
     uint8_t rangeStartStep;  // Start step (0-48). Each step is 25 PWM units; 0 is <=900 and 48 is >=2100. | units: step
@@ -331,7 +330,7 @@ typedef struct __attribute__((packed)) {
 // Sets a single mode activation range by its index.
 // Notes: Expects 5 bytes. Updates the mode configuration and recalculates used mode flags. Returns error if `rangeIndex` or `modePermanentId` is invalid.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t rangeIndex;  // Index of the mode range to set (0 to `MAX_MODE_ACTIVATION_CONDITION_COUNT - 1`) | units: Index
     uint8_t modePermanentId;  // Permanent ID of the flight mode to assign | units: ID
     uint8_t auxChannelIndex;  // 0-based index of the AUX channel | units: Index
@@ -343,7 +342,7 @@ typedef struct __attribute__((packed)) {
 // Returns a bitmask of enabled features.
 // Notes: Feature bits are defined in `feature.h`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint32_t featureMask;  // Bitmask: active features (see `featureMask()`) | units: Bitmask
 } MSP_FEATURE_reply_t;
 
@@ -351,7 +350,7 @@ typedef struct __attribute__((packed)) {
 // Sets the enabled features using a bitmask. Clears all previous features first.
 // Notes: Expects 4 bytes. Updates feature configuration and related settings (e.g., RSSI source).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint32_t featureMask;  // Bitmask: features to enable | units: Bitmask
 } MSP_SET_FEATURE_request_t;
 
@@ -359,7 +358,7 @@ typedef struct __attribute__((packed)) {
 // Returns the sensor board alignment angles relative to the craft frame.
 // Notes: Ranges are typically -1800 to +1800 (i.e. -180.0° to +180.0°).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t rollAlign;  // Board alignment roll angle (`boardAlignment()->rollDeciDegrees`). Negative values tilt left. | units: deci-degrees
     int16_t pitchAlign;  // Board alignment pitch angle (`boardAlignment()->pitchDeciDegrees`). Negative values nose down. | units: deci-degrees
     int16_t yawAlign;  // Board alignment yaw angle (`boardAlignment()->yawDeciDegrees`). Negative values rotate counter-clockwise. | units: deci-degrees
@@ -369,7 +368,7 @@ typedef struct __attribute__((packed)) {
 // Sets the sensor board alignment angles.
 // Notes: Expects 6 bytes encoded as little-endian signed deci-degrees (-1800 to +1800 typical).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t rollAlign;  // Sets `boardAlignmentMutable()->rollDeciDegrees`. | units: deci-degrees
     int16_t pitchAlign;  // Sets `boardAlignmentMutable()->pitchDeciDegrees`. | units: deci-degrees
     int16_t yawAlign;  // Sets `boardAlignmentMutable()->yawDeciDegrees`. | units: deci-degrees
@@ -379,10 +378,10 @@ typedef struct __attribute__((packed)) {
 // Retrieves the configuration for the current sensor.
 // Notes: Scale and offset are signed values matching `batteryMetersConfig()->current` fields.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t scale;  // Current sensor scale factor (`batteryMetersConfig()->current.scale`). Stored in 0.1 mV/A; signed for calibration. | units: 0.1 mV/A
     int16_t offset;  // Current sensor offset (`batteryMetersConfig()->current.offset`). Signed millivolt adjustment. | units: mV
-    currentSensor_e type;  // Enum `currentSensor_e` Type of current sensor hardware | units: Enum | Enum: currentSensor_e
+    uint8_t type;  // Enum `currentSensor_e` Type of current sensor hardware | units: Enum | Enum: currentSensor_e
     uint16_t capacity;  // Battery capacity (constrained 0-65535) (`currentBatteryProfile->capacity.value`). Note: This is legacy, use `MSP2_INAV_BATTERY_CONFIG` for full 32-bit capacity | units: mAh (legacy)
 } MSP_CURRENT_METER_CONFIG_reply_t;
 
@@ -390,10 +389,10 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration for the current sensor.
 // Notes: Expects 7 bytes. Signed values use little-endian two's complement.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t scale;  // Sets `batteryMetersConfigMutable()->current.scale` (0.1 mV/A, signed). | units: 0.1 mV/A
     int16_t offset;  // Sets `batteryMetersConfigMutable()->current.offset` (signed millivolts). | units: mV
-    currentSensor_e type;  // Enum `currentSensor_e` Sets `batteryMetersConfigMutable()->current.type`. | units: Enum | Enum: currentSensor_e
+    uint8_t type;  // Enum `currentSensor_e` Sets `batteryMetersConfigMutable()->current.type`. | units: Enum | Enum: currentSensor_e
     uint16_t capacity;  // Sets `currentBatteryProfileMutable->capacity.value` (truncated to 16 bits) | units: mAh (legacy)
 } MSP_SET_CURRENT_METER_CONFIG_request_t;
 
@@ -401,7 +400,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the mixer type (Legacy, INAV always returns QuadX).
 // Notes: This command is largely obsolete. Mixer configuration is handled differently in INAV (presets, custom mixes). See `MSP2_INAV_MIXER`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t mixerMode;  // Always 3 (QuadX) in INAV for compatibility
 } MSP_MIXER_reply_t;
 
@@ -409,15 +408,15 @@ typedef struct __attribute__((packed)) {
 // Sets the mixer type (Legacy, ignored by INAV).
 // Notes: Expects 1 byte. Calls `mixerUpdateStateFlags()` for potential side effects related to presets.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t mixerMode;  // Mixer mode to set (ignored by INAV)
 } MSP_SET_MIXER_request_t;
 
 // MSP_RX_CONFIG (MSPv1)
 // Retrieves receiver configuration settings. Some fields are Betaflight compatibility placeholders.
 
-typedef struct __attribute__((packed)) {
-    rxSerialReceiverType_e serialRxProvider;  // Enum `rxSerialReceiverType_e`. Serial RX provider (`rxConfig()->serialrx_provider`). | units: Enum | Enum: rxSerialReceiverType_e
+typedef struct MSP_PACKED {
+    uint8_t serialRxProvider;  // Enum `rxSerialReceiverType_e`. Serial RX provider (`rxConfig()->serialrx_provider`). | units: Enum | Enum: rxSerialReceiverType_e
     uint16_t maxCheck;  // Upper channel value threshold for stick commands (`rxConfig()->maxcheck`) | units: PWM
     uint16_t midRc;  // Center channel value (`PWM_RANGE_MIDDLE`, typically 1500) | units: PWM
     uint16_t minCheck;  // Lower channel value threshold for stick commands (`rxConfig()->mincheck`) | units: PWM
@@ -431,15 +430,15 @@ typedef struct __attribute__((packed)) {
     uint32_t reserved2;  // Reserved/Padding. Always 0
     uint8_t reserved3;  // Reserved/Padding. Always 0
     uint8_t bfCompatFpvCamAngle;  // BF compatibility. Always 0
-    rxReceiverType_e receiverType;  // Enum `rxReceiverType_e` Receiver type (Parallel PWM, PPM, Serial) ('rxConfig()->receiverType') | units: Enum | Enum: rxReceiverType_e
+    uint8_t receiverType;  // Enum `rxReceiverType_e` Receiver type (Parallel PWM, PPM, Serial) ('rxConfig()->receiverType') | units: Enum | Enum: rxReceiverType_e
 } MSP_RX_CONFIG_reply_t;
 
 // MSP_SET_RX_CONFIG (MSPv1)
 // Sets receiver configuration settings.
 // Notes: Expects 24 bytes.
 
-typedef struct __attribute__((packed)) {
-    rxSerialReceiverType_e serialRxProvider;  // Enum `rxSerialReceiverType_e`. Sets `rxConfigMutable()->serialrx_provider`. | units: Enum | Enum: rxSerialReceiverType_e
+typedef struct MSP_PACKED {
+    uint8_t serialRxProvider;  // Enum `rxSerialReceiverType_e`. Sets `rxConfigMutable()->serialrx_provider`. | units: Enum | Enum: rxSerialReceiverType_e
     uint16_t maxCheck;  // Sets `rxConfigMutable()->maxcheck`. | units: PWM
     uint16_t midRc;  // Ignored (`PWM_RANGE_MIDDLE` is used) | units: PWM
     uint16_t minCheck;  // Sets `rxConfigMutable()->mincheck`. | units: PWM
@@ -453,14 +452,14 @@ typedef struct __attribute__((packed)) {
     uint32_t reserved2;  // Ignored
     uint8_t reserved3;  // Ignored
     uint8_t bfCompatFpvCamAngle;  // Ignored
-    rxReceiverType_e receiverType;  // Enum `rxReceiverType_e` Sets `rxConfigMutable()->receiverType`. | units: Enum | Enum: rxReceiverType_e
+    uint8_t receiverType;  // Enum `rxReceiverType_e` Sets `rxConfigMutable()->receiverType`. | units: Enum | Enum: rxReceiverType_e
 } MSP_SET_RX_CONFIG_request_t;
 
 // MSP_LED_COLORS (MSPv1)
 // Retrieves the HSV color definitions for configurable LED colors.
 // Notes: Only available if `USE_LED_STRIP` is defined.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t hue;  // Hue value (0-359)
     uint8_t saturation;  // Saturation value (0-255)
     uint8_t value;  // Value/Brightness (0-255)
@@ -470,7 +469,7 @@ typedef struct __attribute__((packed)) {
 // Sets the HSV color definitions for configurable LED colors.
 // Notes: Only available if `USE_LED_STRIP` is defined. Expects `LED_CONFIGURABLE_COLOR_COUNT * 4` bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t hue;  // Hue value (0-359)
     uint8_t saturation;  // Saturation value (0-255)
     uint8_t value;  // Value/Brightness (0-255)
@@ -480,7 +479,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the configuration for each LED on the strip (legacy packed format).
 // Notes: Only available if `USE_LED_STRIP` is defined. Superseded by `MSP2_INAV_LED_STRIP_CONFIG_EX` which uses a clearer struct.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint32_t legacyLedConfig;  // Packed LED configuration (position, function, overlay, color, direction, params). See C code for bit packing details
 } MSP_LED_STRIP_CONFIG_reply_t;
 
@@ -488,7 +487,7 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration for a single LED on the strip using the legacy packed format.
 // Notes: Only available if `USE_LED_STRIP` is defined. Expects 5 bytes. Calls `reevaluateLedConfig()`. Superseded by `MSP2_INAV_SET_LED_STRIP_CONFIG_EX`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t ledIndex;  // Index of the LED to configure (0 to `LED_MAX_STRIP_LENGTH - 1`)
     uint32_t legacyLedConfig;  // Packed LED configuration to set
 } MSP_SET_LED_STRIP_CONFIG_request_t;
@@ -496,7 +495,7 @@ typedef struct __attribute__((packed)) {
 // MSP_RSSI_CONFIG (MSPv1)
 // Retrieves the channel used for analog RSSI input.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t rssiChannel;  // AUX channel index (1-based) used for RSSI, or 0 if disabled (`rxConfig()->rssi_channel`)
 } MSP_RSSI_CONFIG_reply_t;
 
@@ -504,7 +503,7 @@ typedef struct __attribute__((packed)) {
 // Sets the channel used for analog RSSI input.
 // Notes: Expects 1 byte. Input value is constrained 0 to `MAX_SUPPORTED_RC_CHANNEL_COUNT`. Updates the effective RSSI source.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t rssiChannel;  // AUX channel index (1-based) to use for RSSI, or 0 to disable
 } MSP_SET_RSSI_CONFIG_request_t;
 
@@ -512,12 +511,12 @@ typedef struct __attribute__((packed)) {
 // Returns all defined RC adjustment ranges (tuning via aux channels).
 // Notes: See `adjustmentRange_t`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t adjustmentIndex;  // Index of the adjustment slot (0 to `MAX_SIMULTANEOUS_ADJUSTMENT_COUNT - 1`)
     uint8_t auxChannelIndex;  // 0-based index of the AUX channel controlling the adjustment value
     uint8_t rangeStartStep;  // Start step (0-48). Each step is 25 PWM units; 0 is <=900 and 48 is >=2100. | units: step
     uint8_t rangeEndStep;  // End step (0-48). Uses the same 25-PWM step mapping as rangeStartStep. | units: step
-    adjustmentFunction_e adjustmentFunction;  // Function/parameter being adjusted (see `adjustmentFunction_e`). | Enum: adjustmentFunction_e
+    uint8_t adjustmentFunction;  // Function/parameter being adjusted (see `adjustmentFunction_e`). | Enum: adjustmentFunction_e
     uint8_t auxSwitchChannelIndex;  // 0-based index of the AUX channel acting as an enable switch (or 0 if always enabled)
 } MSP_ADJUSTMENT_RANGES_reply_t;
 
@@ -525,13 +524,13 @@ typedef struct __attribute__((packed)) {
 // Sets a single RC adjustment range configuration by its index.
 // Notes: Expects 7 bytes. Returns error if `rangeIndex` or `adjustmentIndex` is invalid.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t rangeIndex;  // Index of the adjustment range to set (0 to `MAX_ADJUSTMENT_RANGE_COUNT - 1`)
     uint8_t adjustmentIndex;  // Adjustment slot index (0 to `MAX_SIMULTANEOUS_ADJUSTMENT_COUNT - 1`)
     uint8_t auxChannelIndex;  // 0-based index of the control AUX channel
     uint8_t rangeStartStep;  // Start step (0-48). Each step is 25 PWM units; 0 is <=900 and 48 is >=2100. | units: step
     uint8_t rangeEndStep;  // End step (0-48). Uses the same 25-PWM step mapping as rangeStartStep. | units: step
-    adjustmentFunction_e adjustmentFunction;  // Function/parameter being adjusted. | Enum: adjustmentFunction_e
+    uint8_t adjustmentFunction;  // Function/parameter being adjusted. | Enum: adjustmentFunction_e
     uint8_t auxSwitchChannelIndex;  // 0-based index of the enable switch AUX channel (or 0)
 } MSP_SET_ADJUSTMENT_RANGE_request_t;
 
@@ -547,7 +546,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves legacy voltage meter configuration (scaled values).
 // Notes: Superseded by `MSP2_INAV_BATTERY_CONFIG`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t vbatScale;  // Voltage sensor scale factor / 10 (`batteryMetersConfig()->voltage.scale / 10`). 0 if `USE_ADC` disabled | units: Scale / 10
     uint8_t vbatMinCell;  // Minimum cell voltage / 10 (`currentBatteryProfile->voltage.cellMin / 10`). 0 if `USE_ADC` disabled | units: 0.1V
     uint8_t vbatMaxCell;  // Maximum cell voltage / 10 (`currentBatteryProfile->voltage.cellMax / 10`). 0 if `USE_ADC` disabled | units: 0.1V
@@ -558,7 +557,7 @@ typedef struct __attribute__((packed)) {
 // Sets legacy voltage meter configuration (scaled values).
 // Notes: Expects 4 bytes. Superseded by `MSP2_INAV_SET_BATTERY_CONFIG`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t vbatScale;  // Sets `batteryMetersConfigMutable()->voltage.scale = value * 10` (if `USE_ADC`) | units: Scale / 10
     uint8_t vbatMinCell;  // Sets `currentBatteryProfileMutable->voltage.cellMin = value * 10` (if `USE_ADC`) | units: 0.1V
     uint8_t vbatMaxCell;  // Sets `currentBatteryProfileMutable->voltage.cellMax = value * 10` (if `USE_ADC`) | units: 0.1V
@@ -568,7 +567,7 @@ typedef struct __attribute__((packed)) {
 // MSP_SONAR_ALTITUDE (MSPv1)
 // Retrieves the altitude measured by the primary rangefinder (sonar or lidar).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int32_t rangefinderAltitude;  // Latest altitude reading from the rangefinder (`rangefinderGetLatestAltitude()`). 0 if `USE_RANGEFINDER` disabled or no reading. | units: cm
 } MSP_SONAR_ALTITUDE_reply_t;
 
@@ -576,7 +575,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the RC channel mapping array (AETR, etc.).
 // Notes: `MAX_MAPPABLE_RX_INPUTS` is currently 4 (Roll, Pitch, Yaw, Throttle).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t rcMap[MAX_MAPPABLE_RX_INPUTS];  // Array defining the mapping from input channel index to logical function (Roll, Pitch, Yaw, Throttle, Aux1...) | length via MAX_MAPPABLE_RX_INPUTS
 } MSP_RX_MAP_reply_t;
 
@@ -584,7 +583,7 @@ typedef struct __attribute__((packed)) {
 // Sets the RC channel mapping array.
 // Notes: Expects `MAX_MAPPABLE_RX_INPUTS` bytes (currently 4).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t rcMap[MAX_MAPPABLE_RX_INPUTS];  // Array defining the new channel mapping | length via MAX_MAPPABLE_RX_INPUTS
 } MSP_SET_RX_MAP_request_t;
 
@@ -596,7 +595,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves summary information about the onboard dataflash chip (if present and used for Blackbox via FlashFS).
 // Notes: Requires `USE_FLASHFS`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t flashReady;  // Boolean: 1 if flash chip is ready, 0 otherwise. (`flashIsReady()`). 0 if `USE_FLASHFS` disabled
     uint32_t sectorCount;  // Total number of sectors on the flash chip (`geometry->sectors`). 0 if `USE_FLASHFS` disabled
     uint32_t totalSize;  // Total size of the flash chip in bytes (`geometry->totalSize`). 0 if `USE_FLASHFS` disabled
@@ -607,12 +606,12 @@ typedef struct __attribute__((packed)) {
 // Reads a block of data from the onboard dataflash (FlashFS).
 // Notes: Requires `USE_FLASHFS`. Read length may be truncated by buffer size or end of flashfs volume.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint32_t address;  // Starting address to read from within the FlashFS volume
     uint16_t size;  // (Optional) Number of bytes to read. Defaults to 128 if not provided
 } MSP_DATAFLASH_READ_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint32_t address;  // The starting address from which data was actually read
     uint8_t data[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // The data read from flash. Length is MIN(requested size, remaining buffer space, remaining flashfs data)
 } MSP_DATAFLASH_READ_reply_t;
@@ -625,7 +624,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the configured loop time (PID loop frequency denominator).
 // Notes: This is the *configured* target loop time, not necessarily the *actual* measured cycle time (see `MSP_STATUS`).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t looptime;  // Configured loop time (`gyroConfig()->looptime`) | units: PWM
 } MSP_LOOP_TIME_reply_t;
 
@@ -633,56 +632,56 @@ typedef struct __attribute__((packed)) {
 // Sets the configured loop time.
 // Notes: Expects 2 bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t looptime;  // New loop time to set (`gyroConfigMutable()->looptime`) | units: PWM
 } MSP_SET_LOOP_TIME_request_t;
 
 // MSP_FAILSAFE_CONFIG (MSPv1)
 // Retrieves the failsafe configuration settings.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t failsafeDelay;  // Delay before failsafe stage 1 activates (`failsafeConfig()->failsafe_delay`) | units: 0.1s
     uint8_t failsafeOffDelay;  // Delay after signal recovery before returning control (`failsafeConfig()->failsafe_off_delay`) | units: 0.1s
     uint16_t failsafeThrottle;  // Throttle level during failsafe stage 2 (`currentBatteryProfile->failsafe_throttle`) | units: PWM
     uint8_t legacyKillSwitch;  // Legacy flag, always 0
     uint16_t failsafeThrottleLowDelay;  // Delay for throttle-based failsafe detection (`failsafeConfig()->failsafe_throttle_low_delay`). Units of 0.1 seconds. | units: 0.1s
-    failsafeProcedure_e failsafeProcedure;  // Enum `failsafeProcedure_e` Failsafe procedure (Drop, RTH, Land, etc.) ('failsafeConfig()->failsafe_procedure') | units: Enum | Enum: failsafeProcedure_e
+    uint8_t failsafeProcedure;  // Enum `failsafeProcedure_e` Failsafe procedure (Drop, RTH, Land, etc.) ('failsafeConfig()->failsafe_procedure') | units: Enum | Enum: failsafeProcedure_e
     uint8_t failsafeRecoveryDelay;  // Delay after RTH finishes before attempting recovery (`failsafeConfig()->failsafe_recovery_delay`) | units: 0.1s
     int16_t failsafeFWRollAngle;  // Fixed-wing failsafe roll angle (`failsafeConfig()->failsafe_fw_roll_angle`). Signed deci-degrees. | units: deci-degrees
     int16_t failsafeFWPitchAngle;  // Fixed-wing failsafe pitch angle (`failsafeConfig()->failsafe_fw_pitch_angle`). Signed deci-degrees. | units: deci-degrees
     int16_t failsafeFWYawRate;  // Fixed-wing failsafe yaw rate (`failsafeConfig()->failsafe_fw_yaw_rate`). Signed degrees per second. | units: deg/s
     uint16_t failsafeStickThreshold;  // Stick movement threshold to exit failsafe (`failsafeConfig()->failsafe_stick_motion_threshold`) | units: PWM units
     uint16_t failsafeMinDistance;  // Minimum distance from home for RTH failsafe (`failsafeConfig()->failsafe_min_distance`). Units of centimeters. | units: cm
-    failsafeProcedure_e failsafeMinDistanceProc;  // Enum `failsafeProcedure_e` Failsafe procedure if below min distance ('failsafeConfig()->failsafe_min_distance_procedure') | units: Enum | Enum: failsafeProcedure_e
+    uint8_t failsafeMinDistanceProc;  // Enum `failsafeProcedure_e` Failsafe procedure if below min distance ('failsafeConfig()->failsafe_min_distance_procedure') | units: Enum | Enum: failsafeProcedure_e
 } MSP_FAILSAFE_CONFIG_reply_t;
 
 // MSP_SET_FAILSAFE_CONFIG (MSPv1)
 // Sets the failsafe configuration settings.
 // Notes: Expects 20 bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t failsafeDelay;  // Sets `failsafeConfigMutable()->failsafe_delay`. | units: 0.1s
     uint8_t failsafeOffDelay;  // Sets `failsafeConfigMutable()->failsafe_off_delay`. | units: 0.1s
     uint16_t failsafeThrottle;  // Sets `currentBatteryProfileMutable->failsafe_throttle`. | units: PWM
     uint8_t legacyKillSwitch;  // Ignored
     uint16_t failsafeThrottleLowDelay;  // Sets `failsafeConfigMutable()->failsafe_throttle_low_delay`. Units of 0.1 seconds. | units: 0.1s
-    failsafeProcedure_e failsafeProcedure;  // Enum `failsafeProcedure_e`. Sets `failsafeConfigMutable()->failsafe_procedure`. | units: Enum | Enum: failsafeProcedure_e
+    uint8_t failsafeProcedure;  // Enum `failsafeProcedure_e`. Sets `failsafeConfigMutable()->failsafe_procedure`. | units: Enum | Enum: failsafeProcedure_e
     uint8_t failsafeRecoveryDelay;  // Sets `failsafeConfigMutable()->failsafe_recovery_delay`. | units: 0.1s
     int16_t failsafeFWRollAngle;  // Sets `failsafeConfigMutable()->failsafe_fw_roll_angle`. Signed deci-degrees. | units: deci-degrees
     int16_t failsafeFWPitchAngle;  // Sets `failsafeConfigMutable()->failsafe_fw_pitch_angle`. Signed deci-degrees. | units: deci-degrees
     int16_t failsafeFWYawRate;  // Sets `failsafeConfigMutable()->failsafe_fw_yaw_rate`. Signed degrees per second. | units: deg/s
     uint16_t failsafeStickThreshold;  // Sets `failsafeConfigMutable()->failsafe_stick_motion_threshold`. | units: PWM units
     uint16_t failsafeMinDistance;  // Sets `failsafeConfigMutable()->failsafe_min_distance`. Units of centimeters. | units: cm
-    failsafeProcedure_e failsafeMinDistanceProc;  // Enum `failsafeProcedure_e`. Sets `failsafeConfigMutable()->failsafe_min_distance_procedure`. | units: Enum | Enum: failsafeProcedure_e
+    uint8_t failsafeMinDistanceProc;  // Enum `failsafeProcedure_e`. Sets `failsafeConfigMutable()->failsafe_min_distance_procedure`. | units: Enum | Enum: failsafeProcedure_e
 } MSP_SET_FAILSAFE_CONFIG_request_t;
 
 // MSP_SDCARD_SUMMARY (MSPv1)
 // Retrieves summary information about the SD card status and filesystem.
 // Notes: Requires `USE_SDCARD` and `USE_ASYNCFATFS`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t sdCardSupported;  // Bitmask: Bit 0 = 1 if SD card support compiled in (`USE_SDCARD`) | units: Bitmask
-    mspSDCardState_e sdCardState;  // Enum (`mspSDCardState_e`): Current state (Not Present, Fatal, Card Init, FS Init, Ready). 0 if `USE_SDCARD` disabled | Enum: mspSDCardState_e
+    uint8_t sdCardState;  // Enum (`mspSDCardState_e`): Current state (Not Present, Fatal, Card Init, FS Init, Ready). 0 if `USE_SDCARD` disabled | Enum: mspSDCardState_e
     uint8_t fsError;  // Last filesystem error code (`afatfs_getLastError()`). 0 if `USE_SDCARD` disabled
     uint32_t freeSpaceKB;  // Free space in KiB (`afatfs_getContiguousFreeSpace() / 1024`). 0 if `USE_SDCARD` disabled
     uint32_t totalSpaceKB;  // Total space in KiB (`sdcard_getMetadata()->numBlocks / 2`). 0 if `USE_SDCARD` disabled
@@ -692,7 +691,7 @@ typedef struct __attribute__((packed)) {
 // Legacy command to retrieve Blackbox configuration. Superseded by `MSP2_BLACKBOX_CONFIG`.
 // Notes: Returns fixed zero values. Use `MSP2_BLACKBOX_CONFIG`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t blackboxDevice;  // Always 0 (API no longer supported)
     uint8_t blackboxRateNum;  // Always 0
     uint8_t blackboxRateDenom;  // Always 0
@@ -715,10 +714,10 @@ typedef struct __attribute__((packed)) {
 // Retrieves OSD configuration settings and layout for screen 0. Coordinates are packed as `(Y << 8) | X`. When `USE_OSD` is not compiled in, only `osdDriverType` = `OSD_DRIVER_NONE` is returned.
 // Notes: 1 byte if `USE_OSD` disabled; full payload (1 + fields + 2*OSD_ITEM_COUNT bytes) otherwise.
 
-typedef struct __attribute__((packed)) {
-    osdDriver_e osdDriverType;  // Enum `osdDriver_e`: `OSD_DRIVER_MAX7456` if `USE_OSD`, else `OSD_DRIVER_NONE`. | units: Enum | Enum: osdDriver_e
-    videoSystem_e videoSystem;  // Enum `videoSystem_e`: Video system (Auto/PAL/NTSC) (`osdConfig()->video_system`). Sent even if OSD disabled | units: Enum | Enum: videoSystem_e
-    osd_unit_e units;  // Enum `osd_unit_e` Measurement units (Metric/Imperial) (`osdConfig()->units`). Sent even if OSD disabled | units: Enum | Enum: osd_unit_e
+typedef struct MSP_PACKED {
+    uint8_t osdDriverType;  // Enum `osdDriver_e`: `OSD_DRIVER_MAX7456` if `USE_OSD`, else `OSD_DRIVER_NONE`. | units: Enum | Enum: osdDriver_e
+    uint8_t videoSystem;  // Enum `videoSystem_e`: Video system (Auto/PAL/NTSC) (`osdConfig()->video_system`). Sent even if OSD disabled | units: Enum | Enum: videoSystem_e
+    uint8_t units;  // Enum `osd_unit_e` Measurement units (Metric/Imperial) (`osdConfig()->units`). Sent even if OSD disabled | units: Enum | Enum: osd_unit_e
     uint8_t rssiAlarm;  // RSSI alarm threshold (`osdConfig()->rssi_alarm`). Sent even if OSD disabled | units: %
     uint16_t capAlarm;  // Capacity alarm threshold (`currentBatteryProfile->capacity.warning`). Truncated to 16 bits. Sent even if OSD disabled. | units: mAh/mWh
     uint16_t timerAlarm;  // Timer alarm threshold in minutes (`osdConfig()->time_alarm`). Sent even if OSD disabled. | units: minutes
@@ -732,10 +731,10 @@ typedef struct __attribute__((packed)) {
 // Sets OSD configuration or a single item's position on screen 0.
 // Notes: Requires `USE_OSD`. Distinguishes formats based on the first byte. Format 1 requires at least 10 bytes. Format 2 requires 3 bytes. Triggers an OSD redraw. See `MSP2_INAV_OSD_SET_*` for more advanced control.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t selector;  // Must be 0xFF (-1) to indicate a configuration update.
-    videoSystem_e videoSystem;  // Enum `videoSystem_e`: Video system (Auto/PAL/NTSC) (`osdConfig()->video_system`). | units: Enum | Enum: videoSystem_e
-    osd_unit_e units;  // Enum `osd_unit_e` Measurement units (Metric/Imperial) (`osdConfig()->units`). | units: Enum | Enum: osd_unit_e
+    uint8_t videoSystem;  // Enum `videoSystem_e`: Video system (Auto/PAL/NTSC) (`osdConfig()->video_system`). | units: Enum | Enum: videoSystem_e
+    uint8_t units;  // Enum `osd_unit_e` Measurement units (Metric/Imperial) (`osdConfig()->units`). | units: Enum | Enum: osd_unit_e
     uint8_t rssiAlarm;  // RSSI alarm threshold (`osdConfig()->rssi_alarm`). | units: %
     uint16_t capAlarm;  // Capacity alarm threshold (`currentBatteryProfile->capacity.warning`). Truncated to 16 bits. | units: mAh/mWh
     uint16_t timerAlarm;  // Timer alarm threshold in minutes (`osdConfig()->time_alarm`). | units: minutes
@@ -744,7 +743,7 @@ typedef struct __attribute__((packed)) {
     uint16_t negAltAlarm;  // Negative altitude alarm threshold (`osdConfig()->neg_alt_alarm`). Optional trailing field. | units: meters
 } MSP_SET_OSD_CONFIG_request_t_dataSize_ge_10;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t itemIndex;  // Index of the OSD item to update (0 to `OSD_ITEM_COUNT - 1`). | units: Index
     uint16_t itemPosition;  // Packed X/Y position (`(Y << 8) | X`) for the specified item. | units: packed
 } MSP_SET_OSD_CONFIG_request_t_dataSize_eq_3;
@@ -757,22 +756,22 @@ typedef struct __attribute__((packed)) {
 // Writes character data to the OSD font memory.
 // Notes: Requires `USE_OSD`. Minimum payload is `OSD_CHAR_VISIBLE_BYTES + 1` (8-bit address + 54 bytes). Payload size determines the address width and whether the extra metadata bytes are present. Writes characters via `displayWriteFontCharacter()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t address;  // Character slot index (0-1023).
     uint8_t charData[OSD_CHAR_BYTES];  // All 64 bytes, including driver metadata. | length via OSD_CHAR_BYTES
 } MSP_OSD_CHAR_WRITE_request_t_payloadSize_ge_OSD_CHAR_BYTES___2__ge66_bytes_;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t address;  // Character slot index (0-255).
     uint8_t charData[OSD_CHAR_BYTES];  // All 64 bytes, including driver metadata. | length via OSD_CHAR_BYTES
 } MSP_OSD_CHAR_WRITE_request_t_payloadSize_eq_OSD_CHAR_BYTES___1__65_bytes_;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t address;  // Character slot index (0-1023).
     uint8_t charData[OSD_CHAR_VISIBLE_BYTES];  // Visible pixel data only (no metadata). | length via OSD_CHAR_VISIBLE_BYTES
 } MSP_OSD_CHAR_WRITE_request_t_payloadSize_eq_OSD_CHAR_VISIBLE_BYTES___2__56_bytes_;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t address;  // Character slot index (0-255).
     uint8_t charData[OSD_CHAR_VISIBLE_BYTES];  // Visible pixel data only (no metadata). | length via OSD_CHAR_VISIBLE_BYTES
 } MSP_OSD_CHAR_WRITE_request_t_payloadSize_eq_OSD_CHAR_VISIBLE_BYTES___1__55_bytes_;
@@ -781,14 +780,14 @@ typedef struct __attribute__((packed)) {
 // Retrieves the current VTX (Video Transmitter) configuration and capabilities.
 // Notes: Returns 1 byte (`VTXDEV_UNKNOWN`) when no VTX is detected or `USE_VTX_CONTROL` is disabled; otherwise sends full payload. BF compatibility field `frequency` (uint16) is missing compared to some BF versions. Use `MSP_VTXTABLE_BAND` and `MSP_VTXTABLE_POWERLEVEL` for details.
 
-typedef struct __attribute__((packed)) {
-    vtxDevType_e vtxDeviceType;  // Enum (`vtxDevType_e`): Type of VTX device detected/configured. `VTXDEV_UNKNOWN` if none | Enum: vtxDevType_e
+typedef struct MSP_PACKED {
+    uint8_t vtxDeviceType;  // Enum (`vtxDevType_e`): Type of VTX device detected/configured. `VTXDEV_UNKNOWN` if none | Enum: vtxDevType_e
     uint8_t band;  // VTX band number (from `vtxSettingsConfig`)
     uint8_t channel;  // VTX channel number (from `vtxSettingsConfig`)
     uint8_t power;  // VTX power level index (from `vtxSettingsConfig()`).
     uint8_t pitMode;  // Boolean: 1 if VTX is currently in pit mode, 0 otherwise.
     uint8_t vtxReady;  // Boolean: 1 if VTX device reported ready, 0 otherwise
-    vtxLowerPowerDisarm_e lowPowerDisarm;  // Enum `vtxLowerPowerDisarm_e`: Low-power behaviour while disarmed (`vtxSettingsConfig()->lowPowerDisarm`). | units: Enum | Enum: vtxLowerPowerDisarm_e
+    uint8_t lowPowerDisarm;  // Enum `vtxLowerPowerDisarm_e`: Low-power behaviour while disarmed (`vtxSettingsConfig()->lowPowerDisarm`). | units: Enum | Enum: vtxLowerPowerDisarm_e
     uint8_t vtxTableAvailable;  // Boolean: 1 if VTX tables (band/power) are available for query
     uint8_t bandCount;  // Number of bands supported by the VTX device
     uint8_t channelCount;  // Number of channels per band supported by the VTX device
@@ -799,11 +798,11 @@ typedef struct __attribute__((packed)) {
 // Sets VTX band/channel and related options. Fields are a progressive superset based on payload length.
 // Notes: Requires dataSize >= 2. If no VTX device or device type is VTXDEV_UNKNOWN, fields are read and discarded. The first uint16 is interpreted as band/channel when value <= VTXCOMMON_MSP_BANDCHAN_CHKVAL, otherwise treated as a frequency value that is not applied by this path. Subsequent fields are applied only if present. If dataSize < 2 the command returns MSP_RESULT_ERROR.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t bandChanOrFreq;  // Encoded band/channel if <= `VTXCOMMON_MSP_BANDCHAN_CHKVAL`; otherwise frequency placeholder.
     uint8_t power;
     uint8_t pitMode;
-    vtxLowerPowerDisarm_e lowPowerDisarm;  // Enum: vtxLowerPowerDisarm_e
+    uint8_t lowPowerDisarm;  // Enum: vtxLowerPowerDisarm_e
     uint16_t pitModeFreq;
     uint8_t band;
     uint8_t channel;
@@ -813,60 +812,60 @@ typedef struct __attribute__((packed)) {
     uint8_t powerCount;  // If 0 < value < current capability, caps `vtxDevice->capability.powerCount`.
 } MSP_SET_VTX_CONFIG_request_t_payloadSize_ge_14;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t bandChanOrFreq;
     uint8_t power;
     uint8_t pitMode;
-    vtxLowerPowerDisarm_e lowPowerDisarm;  // Enum: vtxLowerPowerDisarm_e
+    uint8_t lowPowerDisarm;  // Enum: vtxLowerPowerDisarm_e
     uint16_t pitModeFreq;
     uint8_t band;
     uint8_t channel;
     uint16_t frequency;  // Read and ignored by INAV.
 } MSP_SET_VTX_CONFIG_request_t_payloadSize_ge_11;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t bandChanOrFreq;
     uint8_t power;
     uint8_t pitMode;
-    vtxLowerPowerDisarm_e lowPowerDisarm;  // Enum: vtxLowerPowerDisarm_e
+    uint8_t lowPowerDisarm;  // Enum: vtxLowerPowerDisarm_e
     uint16_t pitModeFreq;
     uint8_t band;  // 1..N; overrides band when present.
     uint8_t channel;  // 1..8; overrides channel when present.
 } MSP_SET_VTX_CONFIG_request_t_payloadSize_ge_9;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t bandChanOrFreq;
     uint8_t power;
     uint8_t pitMode;
-    vtxLowerPowerDisarm_e lowPowerDisarm;  // Enum: vtxLowerPowerDisarm_e
+    uint8_t lowPowerDisarm;  // Enum: vtxLowerPowerDisarm_e
     uint16_t pitModeFreq;  // Read and skipped.
 } MSP_SET_VTX_CONFIG_request_t_payloadSize_ge_7;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t bandChanOrFreq;
     uint8_t power;
     uint8_t pitMode;
-    vtxLowerPowerDisarm_e lowPowerDisarm;  // 0=Off, 1=Always, 2=Until first arm. | Enum: vtxLowerPowerDisarm_e
+    uint8_t lowPowerDisarm;  // 0=Off, 1=Always, 2=Until first arm. | Enum: vtxLowerPowerDisarm_e
 } MSP_SET_VTX_CONFIG_request_t_payloadSize_ge_5;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t bandChanOrFreq;
     uint8_t power;
     uint8_t pitMode;
 } MSP_SET_VTX_CONFIG_request_t_payloadSize_ge_4;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t bandChanOrFreq;  // If <= `VTXCOMMON_MSP_BANDCHAN_CHKVAL`, decoded as band/channel; otherwise treated as a frequency placeholder.
 } MSP_SET_VTX_CONFIG_request_t_payloadSize_eq_2;
 
 // MSP_ADVANCED_CONFIG (MSPv1)
 // Retrieves advanced hardware-related configuration (PWM protocols, rates). Some fields are BF compatibility placeholders.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t gyroSyncDenom;  // Always 1 (BF compatibility)
     uint8_t pidProcessDenom;  // Always 1 (BF compatibility)
     uint8_t useUnsyncedPwm;  // Always 1 (BF compatibility, INAV uses async PWM based on protocol)
-    motorPwmProtocolTypes_e motorPwmProtocol;  // Motor PWM protocol type (`motorConfig()->motorPwmProtocol`). | units: Enum | Enum: motorPwmProtocolTypes_e
+    uint8_t motorPwmProtocol;  // Motor PWM protocol type (`motorConfig()->motorPwmProtocol`). | units: Enum | Enum: motorPwmProtocolTypes_e
     uint16_t motorPwmRate;  // Motor PWM rate (if applicable) (`motorConfig()->motorPwmRate`). | units: Hz
     uint16_t servoPwmRate;  // Servo PWM rate (`servoConfig()->servoPwmRate`). | units: Hz
     uint8_t legacyGyroSync;  // Always 0 (BF compatibility)
@@ -876,11 +875,11 @@ typedef struct __attribute__((packed)) {
 // Sets advanced hardware-related configuration (PWM protocols, rates).
 // Notes: Expects 9 bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t gyroSyncDenom;  // Ignored (legacy Betaflight field).
     uint8_t pidProcessDenom;  // Ignored (legacy Betaflight field).
     uint8_t useUnsyncedPwm;  // Ignored (legacy Betaflight field).
-    motorPwmProtocolTypes_e motorPwmProtocol;  // Sets `motorConfigMutable()->motorPwmProtocol`. | units: Enum | Enum: motorPwmProtocolTypes_e
+    uint8_t motorPwmProtocol;  // Sets `motorConfigMutable()->motorPwmProtocol`. | units: Enum | Enum: motorPwmProtocolTypes_e
     uint16_t motorPwmRate;  // Sets `motorConfigMutable()->motorPwmRate`. | units: Hz
     uint16_t servoPwmRate;  // Sets `servoConfigMutable()->servoPwmRate`. | units: Hz
     uint8_t legacyGyroSync;  // Ignored (legacy Betaflight field).
@@ -889,7 +888,7 @@ typedef struct __attribute__((packed)) {
 // MSP_FILTER_CONFIG (MSPv1)
 // Retrieves filter configuration settings (Gyro, D-term, Yaw, Accel). Some fields are BF compatibility placeholders or legacy.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t gyroMainLpfHz;  // Gyro main low-pass filter cutoff frequency (`gyroConfig()->gyro_main_lpf_hz`) | units: Hz
     uint16_t dtermLpfHz;  // D-term low-pass filter cutoff frequency (`pidProfile()->dterm_lpf_hz`) | units: Hz
     uint16_t yawLpfHz;  // Yaw low-pass filter cutoff frequency (`pidProfile()->yaw_lpf_hz`) | units: Hz
@@ -908,7 +907,7 @@ typedef struct __attribute__((packed)) {
 // Sets filter configuration settings. Handles different payload lengths for backward compatibility.
 // Notes: Requires at least 22 bytes; intermediate length checks enforce legacy Betaflight frame layout and call `pidInitFilters()` once the D-term notch placeholders are consumed.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t gyroMainLpfHz;  // Sets `gyroConfigMutable()->gyro_main_lpf_hz`. (Size >= 5) | units: Hz
     uint16_t dtermLpfHz;  // Sets `pidProfileMutable()->dterm_lpf_hz` (constrained 0-500). (Size >= 5) | units: Hz
     uint16_t yawLpfHz;  // Sets `pidProfileMutable()->yaw_lpf_hz` (constrained 0-255). (Size >= 5) | units: Hz
@@ -927,7 +926,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves advanced PID tuning parameters. Many fields are BF compatibility placeholders.
 // Notes: Acceleration limits are scaled by 10 for compatibility.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t legacyRollPitchItermIgnore;  // Always 0 (Legacy)
     uint16_t legacyYawItermIgnore;  // Always 0 (Legacy)
     uint16_t legacyYawPLimit;  // Always 0 (Legacy)
@@ -945,7 +944,7 @@ typedef struct __attribute__((packed)) {
 // Sets advanced PID tuning parameters.
 // Notes: Expects 17 bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t legacyRollPitchItermIgnore;  // Ignored (legacy compatibility).
     uint16_t legacyYawItermIgnore;  // Ignored (legacy compatibility).
     uint16_t legacyYawPLimit;  // Ignored (legacy compatibility).
@@ -962,26 +961,26 @@ typedef struct __attribute__((packed)) {
 // MSP_SENSOR_CONFIG (MSPv1)
 // Retrieves the configured hardware type for various sensors.
 
-typedef struct __attribute__((packed)) {
-    accelerationSensor_e accHardware;  // Enum (`accelerationSensor_e`): Accelerometer hardware type (`accelerometerConfig()->acc_hardware`) | Enum: accelerationSensor_e
-    baroSensor_e baroHardware;  // Enum (`baroSensor_e`): Barometer hardware type (`barometerConfig()->baro_hardware`). 0 if `USE_BARO` disabled | Enum: baroSensor_e
-    magSensor_e magHardware;  // Enum (`magSensor_e`): Magnetometer hardware type (`compassConfig()->mag_hardware`). 0 if `USE_MAG` disabled | Enum: magSensor_e
-    pitotSensor_e pitotHardware;  // Enum (`pitotSensor_e`): Pitot tube hardware type (`pitotmeterConfig()->pitot_hardware`). 0 if `USE_PITOT` disabled | Enum: pitotSensor_e
-    rangefinderType_e rangefinderHardware;  // Enum (`rangefinderType_e`): Rangefinder hardware type (`rangefinderConfig()->rangefinder_hardware`). 0 if `USE_RANGEFINDER` disabled | Enum: rangefinderType_e
-    opticalFlowSensor_e opflowHardware;  // Enum (`opticalFlowSensor_e`): Optical flow hardware type (`opticalFlowConfig()->opflow_hardware`). 0 if `USE_OPFLOW` disabled | Enum: opticalFlowSensor_e
+typedef struct MSP_PACKED {
+    uint8_t accHardware;  // Enum (`accelerationSensor_e`): Accelerometer hardware type (`accelerometerConfig()->acc_hardware`) | Enum: accelerationSensor_e
+    uint8_t baroHardware;  // Enum (`baroSensor_e`): Barometer hardware type (`barometerConfig()->baro_hardware`). 0 if `USE_BARO` disabled | Enum: baroSensor_e
+    uint8_t magHardware;  // Enum (`magSensor_e`): Magnetometer hardware type (`compassConfig()->mag_hardware`). 0 if `USE_MAG` disabled | Enum: magSensor_e
+    uint8_t pitotHardware;  // Enum (`pitotSensor_e`): Pitot tube hardware type (`pitotmeterConfig()->pitot_hardware`). 0 if `USE_PITOT` disabled | Enum: pitotSensor_e
+    uint8_t rangefinderHardware;  // Enum (`rangefinderType_e`): Rangefinder hardware type (`rangefinderConfig()->rangefinder_hardware`). 0 if `USE_RANGEFINDER` disabled | Enum: rangefinderType_e
+    uint8_t opflowHardware;  // Enum (`opticalFlowSensor_e`): Optical flow hardware type (`opticalFlowConfig()->opflow_hardware`). 0 if `USE_OPFLOW` disabled | Enum: opticalFlowSensor_e
 } MSP_SENSOR_CONFIG_reply_t;
 
 // MSP_SET_SENSOR_CONFIG (MSPv1)
 // Sets the configured hardware type for various sensors.
 // Notes: Expects 6 bytes.
 
-typedef struct __attribute__((packed)) {
-    accelerationSensor_e accHardware;  // Sets `accelerometerConfigMutable()->acc_hardware` | Enum: accelerationSensor_e
-    baroSensor_e baroHardware;  // Sets `barometerConfigMutable()->baro_hardware` (if `USE_BARO`) | Enum: baroSensor_e
-    magSensor_e magHardware;  // Sets `compassConfigMutable()->mag_hardware` (if `USE_MAG`) | Enum: magSensor_e
-    pitotSensor_e pitotHardware;  // Sets `pitotmeterConfigMutable()->pitot_hardware` (if `USE_PITOT`) | Enum: pitotSensor_e
-    rangefinderType_e rangefinderHardware;  // Sets `rangefinderConfigMutable()->rangefinder_hardware` (if `USE_RANGEFINDER`) | Enum: rangefinderType_e
-    opticalFlowSensor_e opflowHardware;  // Sets `opticalFlowConfigMutable()->opflow_hardware` (if `USE_OPFLOW`) | Enum: opticalFlowSensor_e
+typedef struct MSP_PACKED {
+    uint8_t accHardware;  // Sets `accelerometerConfigMutable()->acc_hardware` | Enum: accelerationSensor_e
+    uint8_t baroHardware;  // Sets `barometerConfigMutable()->baro_hardware` (if `USE_BARO`) | Enum: baroSensor_e
+    uint8_t magHardware;  // Sets `compassConfigMutable()->mag_hardware` (if `USE_MAG`) | Enum: magSensor_e
+    uint8_t pitotHardware;  // Sets `pitotmeterConfigMutable()->pitot_hardware` (if `USE_PITOT`) | Enum: pitotSensor_e
+    uint8_t rangefinderHardware;  // Sets `rangefinderConfigMutable()->rangefinder_hardware` (if `USE_RANGEFINDER`) | Enum: rangefinderType_e
+    uint8_t opflowHardware;  // Sets `opticalFlowConfigMutable()->opflow_hardware` (if `USE_OPFLOW`) | Enum: opticalFlowSensor_e
 } MSP_SET_SENSOR_CONFIG_request_t;
 
 // MSP_SPECIAL_PARAMETERS (MSPv1)
@@ -996,7 +995,7 @@ typedef struct __attribute__((packed)) {
 // Provides basic flight controller identity information. Not implemented in modern INAV, but used by legacy versions and MultiWii.
 // Notes: Obsolete. Listed for legacy compatibility only.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t MultiWii_version;  // Scaled version major*100+minor | units: n/a
     uint8_t Mixer_Mode;  // Mixer type | units: Enum
     uint8_t MSP_Version;  // Scaled version major*100+minor | units: n/a
@@ -1007,7 +1006,7 @@ typedef struct __attribute__((packed)) {
 // Provides basic flight controller status including cycle time, errors, sensor status, active modes (first 32), and the current configuration profile.
 // Notes: Superseded by `MSP_STATUS_EX` and `MSP2_INAV_STATUS`. `sensorStatus` bitmask: (Bit 0: ACC, 1: BARO, 2: MAG, 3: GPS, 4: RANGEFINDER, 5: OPFLOW, 6: PITOT, 7: TEMP; Bit 15: hardware failure). `activeModesLow` only contains the first 32 modes; use `MSP_ACTIVEBOXES` for the full set.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t cycleTime;  // Main loop cycle time (`cycleTime`) | units: µs
     uint16_t i2cErrors;  // Number of I2C errors encountered (`i2cGetErrorCounter()`). 0 if `USE_I2C` not defined | units: Count
     uint16_t sensorStatus;  // Bitmask: available/active sensors (`packSensorStatus()`). See notes | units: Bitmask
@@ -1019,7 +1018,7 @@ typedef struct __attribute__((packed)) {
 // Provides raw sensor readings from the IMU (Accelerometer, Gyroscope, Magnetometer).
 // Notes: Acc scaling is approximate (512 LSB/G). Mag units depend on the sensor.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t accX;  // Raw accelerometer X reading, scaled (`acc.accADCf[X] * 512`) | units: ~1/512 G
     int16_t accY;  // Raw accelerometer Y reading, scaled (`acc.accADCf[Y] * 512`) | units: ~1/512 G
     int16_t accZ;  // Raw accelerometer Z reading, scaled (`acc.accADCf[Z] * 512`) | units: ~1/512 G
@@ -1034,14 +1033,14 @@ typedef struct __attribute__((packed)) {
 // MSP_SERVO (MSPv1)
 // Provides the current output values for all supported servos.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t servoOutputs[MAX_SUPPORTED_SERVOS];  // Array of current servo output values (typically 1000-2000) | units: PWM | length via MAX_SUPPORTED_SERVOS
 } MSP_SERVO_reply_t;
 
 // MSP_MOTOR (MSPv1)
 // Provides the current output values for the first 8 motors.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t motorOutputs[8];  // Array of current motor output values (typically 1000-2000). Values beyond `MAX_SUPPORTED_MOTORS` are 0 | units: PWM
 } MSP_MOTOR_reply_t;
 
@@ -1049,7 +1048,7 @@ typedef struct __attribute__((packed)) {
 // Provides the current values of the received RC channels.
 // Notes: Array length equals `rxRuntimeConfig.channelCount`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t rcChannels[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Array of current RC channel values (typically 1000-2000). Length depends on detected channels | units: PWM
 } MSP_RC_reply_t;
 
@@ -1057,8 +1056,8 @@ typedef struct __attribute__((packed)) {
 // Provides raw GPS data (fix status, coordinates, altitude, speed, course).
 // Notes: Only available if `USE_GPS` is defined. Altitude is truncated to meters.
 
-typedef struct __attribute__((packed)) {
-    gpsFixType_e fixType;  // Enum `gpsFixType_e` GPS fix type (`gpsSol.fixType`) | units: Enum | Enum: gpsFixType_e
+typedef struct MSP_PACKED {
+    uint8_t fixType;  // Enum `gpsFixType_e` GPS fix type (`gpsSol.fixType`) | units: Enum | Enum: gpsFixType_e
     uint8_t numSat;  // Number of satellites used in solution (`gpsSol.numSat`) | units: Count
     int32_t latitude;  // Latitude (`gpsSol.llh.lat`) | units: deg * 1e7
     int32_t longitude;  // Longitude (`gpsSol.llh.lon`) | units: deg * 1e7
@@ -1072,7 +1071,7 @@ typedef struct __attribute__((packed)) {
 // Provides computed GPS values: distance and direction to home.
 // Notes: Only available if `USE_GPS` is defined.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t distanceToHome;  // Distance to the home point (`GPS_distanceToHome`) | units: meters
     int16_t directionToHome;  // Direction to the home point (0-360) (`GPS_directionToHome`) | units: degrees
     uint8_t gpsHeartbeat;  // Indicates if GPS data is being received (`gpsSol.flags.gpsHeartbeat`) | units: Boolean
@@ -1082,7 +1081,7 @@ typedef struct __attribute__((packed)) {
 // Provides the current attitude estimate (roll, pitch, yaw).
 // Notes: Yaw is in degrees.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t roll;  // Roll angle (`attitude.values.roll`) | units: deci-degrees
     int16_t pitch;  // Pitch angle (`attitude.values.pitch`) | units: deci-degrees
     int16_t yaw;  // Yaw/Heading angle (`DECIDEGREES_TO_DEGREES(attitude.values.yaw)`) | units: degrees
@@ -1091,7 +1090,7 @@ typedef struct __attribute__((packed)) {
 // MSP_ALTITUDE (MSPv1)
 // Provides estimated altitude, vertical speed (variometer), and raw barometric altitude.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int32_t estimatedAltitude;  // Estimated altitude above home/sea level (`getEstimatedActualPosition(Z)`) | units: cm
     int16_t variometer;  // Estimated vertical speed (`getEstimatedActualVelocity(Z)`) | units: cm/s
     int32_t baroAltitude;  // Latest raw altitude from barometer (`baroGetLatestAltitude()`). 0 if `USE_BARO` disabled | units: cm
@@ -1101,7 +1100,7 @@ typedef struct __attribute__((packed)) {
 // Provides analog sensor readings: battery voltage, current consumption (mAh), RSSI, and current draw (Amps).
 // Notes: Superseded by `MSP2_INAV_ANALOG` which provides higher precision and more fields.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t vbat;  // Battery voltage, scaled (`getBatteryVoltage() / 10`), constrained 0-255 | units: 0.1V
     uint16_t mAhDrawn;  // Consumed battery capacity (`getMAhDrawn()`), constrained 0-65535 | units: mAh
     uint16_t rssi;  // Received Signal Strength Indicator (`getRSSI()`). Units depend on source | units: 0-1023 or %
@@ -1112,7 +1111,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves RC tuning parameters (rates, expos, TPA) for the current control rate profile.
 // Notes: Superseded by `MSP2_INAV_RATE_PROFILE` which includes manual rates/expos.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t legacyRcRate;  // Always 100 (Legacy, unused)
     uint8_t rcExpo;  // Roll/Pitch RC Expo (`currentControlRateProfile->stabilized.rcExpo8`)
     uint8_t rollRate;  // Roll Rate (`currentControlRateProfile->stabilized.rates[FD_ROLL]`)
@@ -1129,7 +1128,7 @@ typedef struct __attribute__((packed)) {
 // Provides the full bitmask of currently active flight modes (boxes).
 // Notes: Use this instead of `MSP_STATUS` or `MSP_STATUS_EX` if more than 32 modes are possible.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     boxBitmask_t activeModes;  // Bitmask: all active modes (`packBoxModeFlags()`). Size depends on `boxBitmask_t` definition | units: Bitmask
 } MSP_ACTIVEBOXES_reply_t;
 
@@ -1137,15 +1136,15 @@ typedef struct __attribute__((packed)) {
 // Retrieves miscellaneous configuration settings, mostly related to RC, GPS, Mag, and Battery voltage (legacy formats).
 // Notes: Superseded by `MSP2_INAV_MISC` and other specific commands which offer better precision and more fields.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t midRc;  // Mid RC value (`PWM_RANGE_MIDDLE`, typically 1500) | units: PWM
     uint16_t legacyMinThrottle;  // Always 0 (Legacy)
     uint16_t maxThrottle;  // Maximum throttle command (`getMaxThrottle()`) | units: PWM
     uint16_t minCommand;  // Minimum motor command when disarmed (`motorConfig()->mincommand`) | units: PWM
     uint16_t failsafeThrottle;  // Failsafe throttle level (`currentBatteryProfile->failsafe_throttle`) | units: PWM
-    gpsProvider_e gpsType;  // Enum `gpsProvider_e` GPS provider type (`gpsConfig()->provider`). 0 if `USE_GPS` disabled | units: Enum | Enum: gpsProvider_e
+    uint8_t gpsType;  // Enum `gpsProvider_e` GPS provider type (`gpsConfig()->provider`). 0 if `USE_GPS` disabled | units: Enum | Enum: gpsProvider_e
     uint8_t legacyGpsBaud;  // Always 0 (Legacy)
-    sbasMode_e gpsSbasMode;  // Enum `sbasMode_e` GPS SBAS mode (`gpsConfig()->sbasMode`). 0 if `USE_GPS` disabled | units: Enum | Enum: sbasMode_e
+    uint8_t gpsSbasMode;  // Enum `sbasMode_e` GPS SBAS mode (`gpsConfig()->sbasMode`). 0 if `USE_GPS` disabled | units: Enum | Enum: sbasMode_e
     uint8_t legacyMwCurrentOut;  // Always 0 (Legacy)
     uint8_t rssiChannel;  // RSSI channel index (1-based) (`rxConfig()->rssi_channel`) | units: Index
     uint8_t reserved1;  // Always 0
@@ -1160,14 +1159,14 @@ typedef struct __attribute__((packed)) {
 // Provides a semicolon-separated string containing the names of all available flight modes (boxes).
 // Notes: The exact set of names depends on compiled features and configuration. Due to the size of the payload, it is recommended that [`MSP_BOXIDS`](#msp_boxids-119--0x77) is used instead.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     char boxNamesString[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // String containing mode names separated by ';'. Null termination not guaranteed by MSP, relies on payload size. (`serializeBoxNamesReply()`)
 } MSP_BOXNAMES_reply_t;
 
 // MSP_PIDNAMES (MSPv1)
 // Provides a semicolon-separated string containing the names of the PID controllers.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     char pidNamesString[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // String "ROLL;PITCH;YAW;ALT;Pos;PosR;NavR;LEVEL;MAG;VEL;". Null termination not guaranteed by MSP
 } MSP_PIDNAMES_reply_t;
 
@@ -1175,13 +1174,13 @@ typedef struct __attribute__((packed)) {
 // Get/Set a single waypoint from the mission plan.
 // Notes: See `navWaypoint_t` and `navWaypointActions_e`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t waypointIndex;  // Index of the waypoint to retrieve (0 to `NAV_MAX_WAYPOINTS - 1`)
 } MSP_WP_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t waypointIndex;  // Index of the returned waypoint | units: Index
-    navWaypointActions_e action;  // Enum `navWaypointActions_e` Waypoint action type | units: Enum | Enum: navWaypointActions_e
+    uint8_t action;  // Enum `navWaypointActions_e` Waypoint action type | units: Enum | Enum: navWaypointActions_e
     int32_t latitude;  // Latitude coordinate | units: deg * 1e7
     int32_t longitude;  // Longitude coordinate | units: deg * 1e7
     int32_t altitude;  // Altitude coordinate (relative to home or sea level, see flag) | units: cm
@@ -1195,7 +1194,7 @@ typedef struct __attribute__((packed)) {
 // Provides a list of permanent IDs associated with the available flight modes (boxes).
 // Notes: Useful for mapping mode range configurations (`MSP_MODE_RANGES`) back to user-understandable modes via `MSP_BOXNAMES`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t boxIds[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Array of permanent IDs for each configured box (`serializeBoxReply()`). Length depends on number of boxes
 } MSP_BOXIDS_reply_t;
 
@@ -1203,7 +1202,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the configuration parameters for all supported servos (min, max, middle, rate). Legacy format with unused fields.
 // Notes: Superseded by `MSP2_INAV_SERVO_CONFIG` which has a cleaner structure.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t min;  // Minimum servo endpoint (`servoParams(i)->min`) | units: PWM
     int16_t max;  // Maximum servo endpoint (`servoParams(i)->max`) | units: PWM
     int16_t middle;  // Middle/Neutral servo position (`servoParams(i)->middle`) | units: PWM
@@ -1218,12 +1217,12 @@ typedef struct __attribute__((packed)) {
 // Retrieves the current status of the navigation system.
 // Notes: Requires `USE_GPS`.
 
-typedef struct __attribute__((packed)) {
-    navSystemStatus_Mode_e navMode;  // Enum (`navSystemStatus_Mode_e`): Current navigation mode (None, RTH, NAV, Hold, etc.) (`NAV_Status.mode`) | Enum: navSystemStatus_Mode_e
-    navSystemStatus_State_e navState;  // Enum (`navSystemStatus_State_e`): Current navigation state (`NAV_Status.state`) | Enum: navSystemStatus_State_e
-    navWaypointActions_e activeWpAction;  // Enum (`navWaypointActions_e`): Action of the currently executing waypoint (`NAV_Status.activeWpAction`) | Enum: navWaypointActions_e
+typedef struct MSP_PACKED {
+    uint8_t navMode;  // Enum (`navSystemStatus_Mode_e`): Current navigation mode (None, RTH, NAV, Hold, etc.) (`NAV_Status.mode`) | Enum: navSystemStatus_Mode_e
+    uint8_t navState;  // Enum (`navSystemStatus_State_e`): Current navigation state (`NAV_Status.state`) | Enum: navSystemStatus_State_e
+    uint8_t activeWpAction;  // Enum (`navWaypointActions_e`): Action of the currently executing waypoint (`NAV_Status.activeWpAction`) | Enum: navWaypointActions_e
     uint8_t activeWpNumber;  // Index: Index of the currently executing waypoint (`NAV_Status.activeWpNumber`)
-    navSystemStatus_Error_e navError;  // Enum (`navSystemStatus_Error_e`): Current navigation error code (`NAV_Status.error`) | Enum: navSystemStatus_Error_e
+    uint8_t navError;  // Enum (`navSystemStatus_Error_e`): Current navigation error code (`NAV_Status.error`) | Enum: navSystemStatus_Error_e
     int16_t targetHeading;  // Target heading for heading controller (`getHeadingHoldTarget()`) | units: degrees
 } MSP_NAV_STATUS_reply_t;
 
@@ -1233,7 +1232,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves settings related to 3D/reversible motor operation.
 // Notes: Requires reversible motor support.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t deadbandLow;  // Lower deadband limit for 3D mode (`reversibleMotorsConfig()->deadband_low`) | units: PWM
     uint16_t deadbandHigh;  // Upper deadband limit for 3D mode (`reversibleMotorsConfig()->deadband_high`) | units: PWM
     uint16_t neutral;  // Neutral throttle point for 3D mode (`reversibleMotorsConfig()->neutral`) | units: PWM
@@ -1242,7 +1241,7 @@ typedef struct __attribute__((packed)) {
 // MSP_RC_DEADBAND (MSPv1)
 // Retrieves RC input deadband settings.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t deadband;  // General RC deadband for Roll/Pitch (`rcControlsConfig()->deadband`) | units: PWM
     uint8_t yawDeadband;  // Specific deadband for Yaw (`rcControlsConfig()->yaw_deadband`) | units: PWM
     uint8_t altHoldDeadband;  // Deadband for altitude hold adjustments (`rcControlsConfig()->alt_hold_deadband`) | units: PWM
@@ -1253,7 +1252,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves sensor alignment settings (legacy format).
 // Notes: Board alignment is now typically handled by `MSP_BOARD_ALIGNMENT`. This returns legacy enum values where applicable.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t gyroAlign;  // Always 0 (Legacy alignment enum)
     uint8_t accAlign;  // Always 0 (Legacy alignment enum)
     uint8_t magAlign;  // Magnetometer alignment (`compassConfig()->mag_align`). 0 if `USE_MAG` disabled
@@ -1264,8 +1263,8 @@ typedef struct __attribute__((packed)) {
 // Retrieves the color index assigned to each LED mode and function/direction combination, including special colors.
 // Notes: Only available if `USE_LED_STRIP` is defined. Entries where `modeIndex == LED_MODE_COUNT` describe special colors.
 
-typedef struct __attribute__((packed)) {
-    ledModeIndex_e modeIndex;  // Index of the LED mode Enum (`ledModeIndex_e`). `LED_MODE_COUNT` for special colors | Enum: ledModeIndex_e
+typedef struct MSP_PACKED {
+    uint8_t modeIndex;  // Index of the LED mode Enum (`ledModeIndex_e`). `LED_MODE_COUNT` for special colors | Enum: ledModeIndex_e
     uint8_t directionOrSpecialIndex;  // Index of the direction (`ledDirectionId_e`) or special color (`ledSpecialColorIds_e`)
     uint8_t colorIndex;  // Index of the color assigned from `ledStripConfig()->colors`
 } MSP_LED_STRIP_MODECOLOR_reply_t;
@@ -1274,13 +1273,13 @@ typedef struct __attribute__((packed)) {
 // Provides battery state information, formatted primarily for DJI FPV Goggles compatibility.
 // Notes: Only available if `USE_DJI_HD_OSD` or `USE_MSP_DISPLAYPORT` is defined. Some values are duplicated from `MSP_ANALOG` / `MSP2_INAV_ANALOG` but potentially with different scaling/types.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t cellCount;  // Number of battery cells (`getBatteryCellCount()`) | units: Count
     uint16_t capacity;  // Battery capacity (`currentBatteryProfile->capacity.value`) | units: mAh
     uint8_t vbatScaled;  // Battery voltage / 10 (`getBatteryVoltage() / 10`) | units: 0.1V
     uint16_t mAhDrawn;  // Consumed capacity (`getMAhDrawn()`) | units: mAh
     int16_t amperage;  // Current draw (`getAmperage()`) | units: 0.01A
-    batteryState_e batteryState;  // Enum `batteryState_e` Current battery state (`getBatteryState()`, see `BATTERY_STATE_*`) | units: Enum | Enum: batteryState_e
+    uint8_t batteryState;  // Enum `batteryState_e` Current battery state (`getBatteryState()`, see `BATTERY_STATE_*`) | units: Enum | Enum: batteryState_e
     uint16_t vbatActual;  // Actual battery voltage (`getBatteryVoltage()`) | units: 0.01V
 } MSP_BATTERY_STATE_reply_t;
 
@@ -1292,11 +1291,11 @@ typedef struct __attribute__((packed)) {
 // Retrieves information about a specific VTX power level from the VTX table.
 // Notes: Requires `USE_VTX_CONTROL`. Returns error if index is out of bounds. The `powerValue` field is unused.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t powerLevelIndex;  // 1-based index of the power level to query
 } MSP_VTXTABLE_POWERLEVEL_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t powerLevelIndex;  // 1-based index of the returned power level
     uint16_t powerValue;  // Always 0 (Actual power value in mW is not stored/returned via MSP)
     uint8_t labelLength;  // Length of the power level label string that follows
@@ -1305,9 +1304,9 @@ typedef struct __attribute__((packed)) {
 
 // MSP_STATUS_EX (MSPv1)
 // Provides extended flight controller status, including CPU load, arming flags, and calibration status, in addition to `MSP_STATUS` fields.
-// Notes: Superseded by `MSP2_INAV_STATUS` which provides the full 32-bit `armingFlags` and other enhancements.
+// Notes: Superseded by `MSP2_INAV_STATUS` which provides the full 32-bit `armingFlags` and other enhancements. The `accCalibAxisFlags` field is not present in `MSP2_INAV_STATUS` but is available via `MSP_CALIBRATION_DATA`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t cycleTime;  // Main loop cycle time | units: µs
     uint16_t i2cErrors;  // I2C errors | units: Count
     uint16_t sensorStatus;  // Bitmask: Sensor status | units: Bitmask
@@ -1322,23 +1321,23 @@ typedef struct __attribute__((packed)) {
 // Provides the hardware status for each individual sensor system.
 // Notes: Status values map to the `hardwareSensorStatus_e` enum: `HW_SENSOR_NONE`, `HW_SENSOR_OK`, `HW_SENSOR_UNAVAILABLE`, `HW_SENSOR_UNHEALTHY`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t overallHealth;  // 1 if all essential hardware is healthy, 0 otherwise (`isHardwareHealthy()`) | units: Boolean
-    hardwareSensorStatus_e gyroStatus;  // Enum `hardwareSensorStatus_e` Gyro hardware status (`getHwGyroStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
-    hardwareSensorStatus_e accStatus;  // Enum `hardwareSensorStatus_e` Accelerometer hardware status (`getHwAccelerometerStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
-    hardwareSensorStatus_e magStatus;  // Enum `hardwareSensorStatus_e` Compass hardware status (`getHwCompassStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
-    hardwareSensorStatus_e baroStatus;  // Enum `hardwareSensorStatus_e` Barometer hardware status (`getHwBarometerStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
-    hardwareSensorStatus_e gpsStatus;  // Enum `hardwareSensorStatus_e` GPS hardware status (`getHwGPSStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
-    hardwareSensorStatus_e rangefinderStatus;  // Enum `hardwareSensorStatus_e` Rangefinder hardware status (`getHwRangefinderStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
-    hardwareSensorStatus_e pitotStatus;  // Enum `hardwareSensorStatus_e` Pitot hardware status (`getHwPitotmeterStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
-    hardwareSensorStatus_e opflowStatus;  // Enum `hardwareSensorStatus_e` Optical Flow hardware status (`getHwOpticalFlowStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
+    uint8_t gyroStatus;  // Enum `hardwareSensorStatus_e` Gyro hardware status (`getHwGyroStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
+    uint8_t accStatus;  // Enum `hardwareSensorStatus_e` Accelerometer hardware status (`getHwAccelerometerStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
+    uint8_t magStatus;  // Enum `hardwareSensorStatus_e` Compass hardware status (`getHwCompassStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
+    uint8_t baroStatus;  // Enum `hardwareSensorStatus_e` Barometer hardware status (`getHwBarometerStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
+    uint8_t gpsStatus;  // Enum `hardwareSensorStatus_e` GPS hardware status (`getHwGPSStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
+    uint8_t rangefinderStatus;  // Enum `hardwareSensorStatus_e` Rangefinder hardware status (`getHwRangefinderStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
+    uint8_t pitotStatus;  // Enum `hardwareSensorStatus_e` Pitot hardware status (`getHwPitotmeterStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
+    uint8_t opflowStatus;  // Enum `hardwareSensorStatus_e` Optical Flow hardware status (`getHwOpticalFlowStatus()`) | units: Enum | Enum: hardwareSensorStatus_e
 } MSP_SENSOR_STATUS_reply_t;
 
 // MSP_UID (MSPv1)
 // Provides the unique identifier of the microcontroller.
 // Notes: Total 12 bytes, representing a 96-bit unique ID.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint32_t uid0;  // First 32 bits of the unique ID (`U_ID_0`)
     uint32_t uid1;  // Middle 32 bits of the unique ID (`U_ID_1`)
     uint32_t uid2;  // Last 32 bits of the unique ID (`U_ID_2`)
@@ -1348,7 +1347,7 @@ typedef struct __attribute__((packed)) {
 // Provides satellite signal strength information (legacy U-Blox compatibility stub).
 // Notes: Requires `USE_GPS`. This is just a stub in INAV and does not provide actual per-satellite signal info. HDOP digits are not formatted correctly: tens and units both contain `gpsSol.hdop / 100`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t protocolVersion;  // Always 1 (Stub version)
     uint8_t numChannels;  // Always 0 (Number of SV info channels reported)
     uint8_t hdopHundredsDigit;  // Hundreds digit of HDOP (stub always writes 0)
@@ -1360,7 +1359,7 @@ typedef struct __attribute__((packed)) {
 // Provides debugging statistics for the GPS communication link.
 // Notes: Requires `USE_GPS`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t lastMessageDt;  // Time since last valid GPS message (`gpsStats.lastMessageDt`) | units: ms
     uint32_t errors;  // Number of GPS communication errors (`gpsStats.errors`) | units: Count
     uint32_t timeouts;  // Number of GPS communication timeouts (`gpsStats.timeouts`) | units: Count
@@ -1368,6 +1367,7 @@ typedef struct __attribute__((packed)) {
     uint16_t hdop;  // Horizontal Dilution of Precision (`gpsSol.hdop`) | units: HDOP * 100
     uint16_t eph;  // Estimated Horizontal Position Accuracy (`gpsSol.eph`) | units: cm
     uint16_t epv;  // Estimated Vertical Position Accuracy (`gpsSol.epv`) | units: cm
+    uint8_t hwVersion;  // GPS hardware version bit-field: bits[7:6]=series (0b01=u-blox Neo/M), bits[5:0]=generation. E.g. 0x48=M8, 0x49=M9, 0x4A=M10, 0=unknown.
 } MSP_GPSSTATISTICS_reply_t;
 
 // MSP_OSD_VIDEO_CONFIG (MSPv1)
@@ -1380,7 +1380,7 @@ typedef struct __attribute__((packed)) {
 // Allows a transmitter LUA script (or similar) to send runtime information (currently only RSSI) to the firmware.
 // Notes: Calls `setRSSIFromMSP()`. Expects 1 byte.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t rssi;  // RSSI value (0-255) provided by the external source; firmware scales it to 10-bit (`value << 2`) | units: Raw
 } MSP_SET_TX_INFO_request_t;
 
@@ -1388,8 +1388,8 @@ typedef struct __attribute__((packed)) {
 // Provides information potentially useful for transmitter LUA scripts.
 // Notes: See `rssiSource_e`.
 
-typedef struct __attribute__((packed)) {
-    rssiSource_e rssiSource;  // Enum: Source of the RSSI value (`getRSSISource()`, see `rssiSource_e`) | Enum: rssiSource_e
+typedef struct MSP_PACKED {
+    uint8_t rssiSource;  // Enum: Source of the RSSI value (`getRSSISource()`, see `rssiSource_e`) | Enum: rssiSource_e
     uint8_t rtcDateTimeIsSet;  // Boolean: 1 if the RTC has been set, 0 otherwise
 } MSP_TX_INFO_reply_t;
 
@@ -1397,7 +1397,7 @@ typedef struct __attribute__((packed)) {
 // Provides raw RC channel data to the flight controller, typically used when the receiver is connected via MSP (e.g., MSP RX feature).
 // Notes: Requires `USE_RX_MSP`. Maximum channels `MAX_SUPPORTED_RC_CHANNEL_COUNT`. Calls `rxMspFrameReceive()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t rcChannels[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Array of RC channel values (typically 1000-2000). Number of channels determined by payload size | units: PWM
 } MSP_SET_RAW_RC_request_t;
 
@@ -1405,8 +1405,8 @@ typedef struct __attribute__((packed)) {
 // Provides raw GPS data to the flight controller, typically for simulation or external GPS injection.
 // Notes: Requires `USE_GPS`. Expects 14 bytes. Updates `gpsSol` structure and calls `onNewGPSData()`. Note the altitude unit mismatch (meters in MSP, cm internal). Does not provide velocity components.
 
-typedef struct __attribute__((packed)) {
-    gpsFixType_e fixType;  // Enum `gpsFixType_e` GPS fix type | units: Enum | Enum: gpsFixType_e
+typedef struct MSP_PACKED {
+    uint8_t fixType;  // Enum `gpsFixType_e` GPS fix type | units: Enum | Enum: gpsFixType_e
     uint8_t numSat;  // Number of satellites | units: Count
     int32_t latitude;  // Latitude | units: deg * 1e7
     int32_t longitude;  // Longitude | units: deg * 1e7
@@ -1422,7 +1422,7 @@ typedef struct __attribute__((packed)) {
 // Sets RC tuning parameters (rates, expos, TPA) for the current control rate profile.
 // Notes: Expects 10 or 11 bytes. Calls `schedulePidGainsUpdate()`. Superseded by `MSP2_INAV_SET_RATE_PROFILE`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t legacyRcRate;  // Ignored
     uint8_t rcExpo;  // Sets `currentControlRateProfile->stabilized.rcExpo8`
     uint8_t rollRate;  // Sets `currentControlRateProfile->stabilized.rates[FD_ROLL]` (constrained)
@@ -1447,15 +1447,15 @@ typedef struct __attribute__((packed)) {
 // Sets miscellaneous configuration settings (legacy formats/scaling).
 // Notes: Expects 22 bytes. Superseded by `MSP2_INAV_SET_MISC`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t midRc;  // Ignored | units: PWM
     uint16_t legacyMinThrottle;  // Ignored
     uint16_t legacyMaxThrottle;  // Ignored
     uint16_t minCommand;  // Sets `motorConfigMutable()->mincommand` (constrained 0-PWM_RANGE_MAX) | units: PWM
     uint16_t failsafeThrottle;  // Sets `currentBatteryProfileMutable->failsafe_throttle` (constrained PWM_RANGE_MIN/MAX) | units: PWM
-    gpsProvider_e gpsType;  // Enum `gpsProvider_e` (Sets `gpsConfigMutable()->provider`) | units: Enum | Enum: gpsProvider_e
+    uint8_t gpsType;  // Enum `gpsProvider_e` (Sets `gpsConfigMutable()->provider`) | units: Enum | Enum: gpsProvider_e
     uint8_t legacyGpsBaud;  // Ignored
-    sbasMode_e gpsSbasMode;  // Enum `sbasMode_e` (Sets `gpsConfigMutable()->sbasMode`) | units: Enum | Enum: sbasMode_e
+    uint8_t gpsSbasMode;  // Enum `sbasMode_e` (Sets `gpsConfigMutable()->sbasMode`) | units: Enum | Enum: sbasMode_e
     uint8_t legacyMwCurrentOut;  // Ignored
     uint8_t rssiChannel;  // Sets `rxConfigMutable()->rssi_channel` (constrained 0-MAX_SUPPORTED_RC_CHANNEL_COUNT). Updates source | units: Index
     uint8_t reserved1;  // Ignored
@@ -1474,31 +1474,31 @@ typedef struct __attribute__((packed)) {
 // Sets a single waypoint in the mission plan.
 // Notes: Expects 21 bytes. Calls `setWaypoint()`. If `USE_FW_AUTOLAND` is enabled, this also interacts with autoland approach settings based on waypoint index and flags.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t waypointIndex;  // Index of the waypoint to set (0 to `NAV_MAX_WAYPOINTS - 1`) | units: Index
-    navWaypointActions_e action;  // Enum `navWaypointActions_e` Waypoint action type | units: Enum | Enum: navWaypointActions_e
+    uint8_t action;  // Enum `navWaypointActions_e` Waypoint action type | units: Enum | Enum: navWaypointActions_e
     int32_t latitude;  // Latitude coordinate | units: deg * 1e7
     int32_t longitude;  // Longitude coordinate | units: deg * 1e7
     int32_t altitude;  // Altitude coordinate | units: cm
     uint16_t param1;  // Parameter 1 | units: Varies
     uint16_t param2;  // Parameter 2 | units: Varies
     uint16_t param3;  // Parameter 3 | units: Varies
-    navWaypointFlags_e flag;  // Bitmask: Waypoint flags (`navWaypointFlags_e`) | units: Bitmask | Enum: navWaypointFlags_e
+    uint8_t flag;  // Bitmask: Waypoint flags (`navWaypointFlags_e`) | units: Bitmask | Enum: navWaypointFlags_e
 } MSP_SET_WP_request_t;
 
 // MSP_SELECT_SETTING (MSPv1)
 // Selects the active configuration profile and saves it.
 // Notes: Will fail if armed. Calls `setConfigProfileAndWriteEEPROM()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t profileIndex;  // Index of the profile to activate (0-based)
 } MSP_SELECT_SETTING_request_t;
 
 // MSP_SET_HEAD (MSPv1)
 // Sets the target heading for the heading hold controller (e.g., during MAG mode).
-// Notes: Expects 2 bytes. Calls `updateHeadingHoldTarget()`.
+// Notes: Expects 2 bytes. Calls `updateHeadingHoldTarget()`. Also synchronizes navigation yaw targets (including cruise/course) when NAV is controlling yaw.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t heading;  // Target heading (0-359) | units: degrees
 } MSP_SET_HEAD_request_t;
 
@@ -1506,7 +1506,7 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration for a single servo (legacy format).
 // Notes: Expects 15 bytes. Returns error if index is invalid. Calls `servoComputeScalingFactors()`. Superseded by `MSP2_INAV_SET_SERVO_CONFIG`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t servoIndex;  // Index of the servo to configure (0 to `MAX_SUPPORTED_SERVOS - 1`) | units: Index
     uint16_t min;  // Minimum servo endpoint | units: PWM
     uint16_t max;  // Maximum servo endpoint | units: PWM
@@ -1522,7 +1522,7 @@ typedef struct __attribute__((packed)) {
 // Sets the disarmed motor values, typically used for motor testing or propeller balancing functions in a configurator.
 // Notes: Expects 16 bytes. Modifies the `motor_disarmed` array. These values are *not* saved persistently.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t motorValues[8];  // Array of motor values to set when disarmed. Only affects first `MAX_SUPPORTED_MOTORS` entries | units: PWM
 } MSP_SET_MOTOR_request_t;
 
@@ -1532,7 +1532,7 @@ typedef struct __attribute__((packed)) {
 // Sets parameters related to 3D/reversible motor operation.
 // Notes: Expects 6 bytes. Requires reversible motor support.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t deadbandLow;  // Sets `reversibleMotorsConfigMutable()->deadband_low` | units: PWM
     uint16_t deadbandHigh;  // Sets `reversibleMotorsConfigMutable()->deadband_high` | units: PWM
     uint16_t neutral;  // Sets `reversibleMotorsConfigMutable()->neutral` | units: PWM
@@ -1542,7 +1542,7 @@ typedef struct __attribute__((packed)) {
 // Sets RC input deadband values.
 // Notes: Expects 5 bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t deadband;  // Sets `rcControlsConfigMutable()->deadband` | units: PWM
     uint8_t yawDeadband;  // Sets `rcControlsConfigMutable()->yaw_deadband` | units: PWM
     uint8_t altHoldDeadband;  // Sets `rcControlsConfigMutable()->alt_hold_deadband` | units: PWM
@@ -1557,7 +1557,7 @@ typedef struct __attribute__((packed)) {
 // Sets sensor alignment (legacy format).
 // Notes: Expects 4 bytes. Use `MSP_SET_BOARD_ALIGNMENT` for primary board orientation.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t gyroAlign;  // Ignored
     uint8_t accAlign;  // Ignored
     uint8_t magAlign;  // Sets `compassConfigMutable()->mag_align` (if `USE_MAG`)
@@ -1568,7 +1568,7 @@ typedef struct __attribute__((packed)) {
 // Sets the color index for a specific LED mode/function combination.
 // Notes: Only available if `USE_LED_STRIP` is defined. Expects 3 bytes. Returns error if setting fails (invalid index).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t modeIndex;  // Index of the LED mode (`ledModeIndex_e` or `LED_MODE_COUNT` for special)
     uint8_t directionOrSpecialIndex;  // Index of the direction (`ledDirectionId_e`) or special color (`ledSpecialColorIds_e`)
     uint8_t colorIndex;  // Index of the color to assign from `ledStripConfig()->colors`
@@ -1586,9 +1586,9 @@ typedef struct __attribute__((packed)) {
 // Retrieves the custom servo mixer rules (legacy format).
 // Notes: Superseded by `MSP2_INAV_SERVO_MIXER`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t targetChannel;  // Servo output channel index (0-based) | units: Index
-    inputSource_e inputSource;  // Enum `inputSource_e` Input source for the mix (RC chan, Roll, Pitch...) | units: Enum | Enum: inputSource_e
+    uint8_t inputSource;  // Enum `inputSource_e` Input source for the mix (RC chan, Roll, Pitch...) | units: Enum | Enum: inputSource_e
     int16_t rate;  // Mixing rate/weight (`-1000` to `+1000`, percent with sign) | units: %
     uint8_t speed;  // Speed/Slew rate limit (`0`=instant, higher slows response) | units: 0-255
     uint8_t reserved1;  // Always 0
@@ -1600,10 +1600,10 @@ typedef struct __attribute__((packed)) {
 // Sets a single custom servo mixer rule (legacy format).
 // Notes: Expects 9 bytes. Returns error if index invalid. Calls `loadCustomServoMixer()`. Superseded by `MSP2_INAV_SET_SERVO_MIXER`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t ruleIndex;  // Index of the rule to set (0 to `MAX_SERVO_RULES - 1`) | units: Index
     uint8_t targetChannel;  // Servo output channel index | units: Index
-    inputSource_e inputSource;  // Enum `inputSource_e` Input source for the mix | units: Enum | Enum: inputSource_e
+    uint8_t inputSource;  // Enum `inputSource_e` Input source for the mix | units: Enum | Enum: inputSource_e
     int16_t rate;  // Mixing rate/weight (`-1000` to `+1000`, percent with sign) | units: %
     uint8_t speed;  // Speed/Slew rate limit (`0`=instant, higher slows response) | units: 0-255
     uint16_t legacyMinMax;  // Ignored
@@ -1614,7 +1614,7 @@ typedef struct __attribute__((packed)) {
 // Enables serial passthrough mode to peripherals like ESCs (BLHeli 4-way) or other serial devices.
 // Notes: Accepts 0 bytes (defaults to ESC 4-way) or up to 2 bytes for mode/argument. If successful, sets `mspPostProcessFn` to the appropriate handler (`mspSerialPassthroughFn` or `esc4wayProcess`). This handler takes over the serial port after the reply is sent. Requires `USE_SERIAL_4WAY_BLHELI_INTERFACE` for ESC passthrough.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t status;  // 1 if passthrough started successfully, 0 on error (e.g., port not found). For 4way, returns number of ESCs found
 } MSP_SET_PASSTHROUGH_reply_t;
 
@@ -1622,7 +1622,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the current Real-Time Clock time.
 // Notes: Requires RTC hardware/support. Returns (0, 0) if time is not available/set.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int32_t seconds;  // Seconds since epoch (or relative time if not set). 0 if RTC time unknown | units: Seconds
     uint16_t millis;  // Millisecond part of the time. 0 if RTC time unknown | units: Milliseconds
 } MSP_RTC_reply_t;
@@ -1631,7 +1631,7 @@ typedef struct __attribute__((packed)) {
 // Sets the Real-Time Clock time.
 // Notes: Requires RTC hardware/support. Expects 6 bytes. Uses `rtcSet()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int32_t seconds;  // Seconds component of time to set | units: Seconds
     uint16_t millis;  // Millisecond component of time to set | units: Milliseconds
 } MSP_SET_RTC_request_t;
@@ -1648,7 +1648,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves debug ("serial printf") messages from the firmware.
 // Notes: Published via the LOG UART or shared MSP/LOG port using `mspSerialPushPort()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     char Message_Text[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Debug message text (not NUL-terminated). See [serial printf debugging](https://github.com/iNavFlight/inav/blob/master/docs/development/serial_printf_debugging.md)
 } MSP_DEBUGMSG_reply_t;
 
@@ -1656,7 +1656,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves values from the firmware's `debug[]` array (legacy 16-bit version).
 // Notes: Useful for developers. Values are truncated to the lower 16 bits of each `debug[]` entry. See `MSP2_INAV_DEBUG` for full 32-bit values.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t debugValues[4];  // First 4 values from the `debug` array
 } MSP_DEBUG_reply_t;
 
@@ -1667,7 +1667,7 @@ typedef struct __attribute__((packed)) {
 // MSP2_COMMON_TZ (MSPv2)
 // Gets the time zone offset configuration.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t tzOffsetMinutes;  // Time zone offset from UTC (`timeConfig()->tz_offset`) | units: Minutes
     uint8_t tzAutoDst;  // Automatic daylight saving time enabled (`timeConfig()->tz_automatic_dst`) | units: Boolean
 } MSP2_COMMON_TZ_reply_t;
@@ -1676,11 +1676,11 @@ typedef struct __attribute__((packed)) {
 // Sets the time zone offset configuration.
 // Notes: Accepts 2 or 3 bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t tz_offset;  // Timezone offset from UTC. | units: minutes
 } MSP2_COMMON_SET_TZ_request_t_dataSize_eq_2;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t tz_offset;  // Timezone offset from UTC. | units: minutes
     uint8_t tz_automatic_dst;  // Automatic DST enable (0/1). | units: bool
 } MSP2_COMMON_SET_TZ_request_t_dataSize_eq_3;
@@ -1689,11 +1689,11 @@ typedef struct __attribute__((packed)) {
 // Gets the value of a specific configuration setting, identified by name or index.
 // Notes: Returns error if setting not found. Use `MSP2_COMMON_SETTING_INFO` to discover settings, types, and sizes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t settingIdentifier[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Setting name (null-terminated string) OR index selector (`0x00` followed by `uint16_t` index)
 } MSP2_COMMON_SETTING_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t settingValue[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Raw byte value of the setting. Size depends on the setting's type (`settingGetValueSize()`)
 } MSP2_COMMON_SETTING_reply_t;
 
@@ -1701,7 +1701,7 @@ typedef struct __attribute__((packed)) {
 // Sets the value of a specific configuration setting, identified by name or index.
 // Notes: Performs type checking and range validation (min/max). Returns error if setting not found, value size mismatch, or value out of range. Handles different data types (`uint8`, `int16`, `float`, `string`, etc.) internally.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t settingIdentifier[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Setting name (null-terminated string) OR Index (0x00 followed by `uint16_t` index)
     uint8_t settingValue[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Raw byte value to set for the setting. Size must match the setting's type
 } MSP2_COMMON_SET_SETTING_request_t;
@@ -1710,7 +1710,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the current motor mixer configuration (throttle, roll, pitch, yaw weights) for each motor.
 // Notes: Scaling is `(float_weight + 2.0) * 1000`. `primaryMotorMixer()` provides the data. If multiple mixer profiles are enabled (`MAX_MIXER_PROFILE_COUNT > 1`), an additional block of mixes for the next profile follows immediately.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t motorMix[4];  // Weights for a single motor `[throttle, roll, pitch, yaw]`, each encoded as `(mix + 2.0) * 1000` (range 0-4000) | units: Scaled (0-4000)
 } MSP2_COMMON_MOTOR_MIXER_reply_t;
 
@@ -1718,7 +1718,7 @@ typedef struct __attribute__((packed)) {
 // Sets the motor mixer weights for a single motor in the primary mixer profile.
 // Notes: Expects 9 bytes. Modifies `primaryMotorMixerMutable()`. Returns error if index is invalid.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t motorIndex;  // Index of the motor to configure (0 to `MAX_SUPPORTED_MOTORS - 1`) | units: Index
     uint16_t throttleWeight;  // Sets throttle weight from `(value / 1000.0) - 2.0 | units: Scaled (0-4000)
     uint16_t rollWeight;  // Sets roll weight from `(value / 1000.0) - 2.0 | units: Scaled (0-4000)
@@ -1729,7 +1729,7 @@ typedef struct __attribute__((packed)) {
 // MSP2_COMMON_SETTING_INFO (MSPv2)
 // Gets detailed information about a specific configuration setting (name, type, range, flags, current value, etc.).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     char settingName[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Null-terminated setting name
     uint16_t pgn;  // Parameter Group Number (PGN) ID
     uint8_t type;  // Variable type (`VAR_UINT8`, `VAR_FLOAT`, etc.)
@@ -1748,11 +1748,11 @@ typedef struct __attribute__((packed)) {
 // Gets a list of Parameter Group Numbers (PGNs) used by settings, along with the start and end setting indexes for each group. Can request info for a single PGN.
 // Notes: Allows efficient fetching of related settings by group.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t pgn;  // (Optional) PGN ID to query. If omitted, returns all used PGNs
 } MSP2_COMMON_PG_LIST_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t pgn;  // Parameter Group Number (PGN) ID
     uint16_t startIndex;  // Absolute index of the first setting in this group
     uint16_t endIndex;  // Absolute index of the last setting in this group
@@ -1762,8 +1762,8 @@ typedef struct __attribute__((packed)) {
 // Retrieves the configuration for all available serial ports.
 // Notes: Baud rate indexes map to actual baud rates (e.g., 9600, 115200). See `baudRates` array.
 
-typedef struct __attribute__((packed)) {
-    serialPortIdentifier_e identifier;  // Port identifier Enum (`serialPortIdentifier_e`) | Enum: serialPortIdentifier_e
+typedef struct MSP_PACKED {
+    uint8_t identifier;  // Port identifier Enum (`serialPortIdentifier_e`) | Enum: serialPortIdentifier_e
     uint32_t functionMask;  // Bitmask: enabled functions (`FUNCTION_*`) | units: Bitmask
     uint8_t mspBaudIndex;  // Baud rate index for MSP function
     uint8_t gpsBaudIndex;  // Baud rate index for GPS function
@@ -1775,8 +1775,8 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration for one or more serial ports.
 // Notes: Payload size must be a multiple of the size of one port config entry (1 + 4 + 4 = 9 bytes). Returns error if identifier is invalid or size is incorrect. Baud rate indexes are constrained `BAUD_MIN` to `BAUD_MAX`.
 
-typedef struct __attribute__((packed)) {
-    serialPortIdentifier_e identifier;  // Port identifier Enum (`serialPortIdentifier_e`) | Enum: serialPortIdentifier_e
+typedef struct MSP_PACKED {
+    uint8_t identifier;  // Port identifier Enum (`serialPortIdentifier_e`) | Enum: serialPortIdentifier_e
     uint32_t functionMask;  // Bitmask: functions to enable | units: Bitmask
     uint8_t mspBaudIndex;  // Baud rate index for MSP
     uint8_t gpsBaudIndex;  // Baud rate index for GPS
@@ -1788,7 +1788,7 @@ typedef struct __attribute__((packed)) {
 // Sets the position and status information for a "radar" Point of Interest (POI). Used for displaying other craft/objects on the OSD map.
 // Notes: Expects 19 bytes. POI index is clamped to `RADAR_MAX_POIS - 1`. Updates the `radar_pois` array.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t poiIndex;  // Index of the POI slot (0 to `RADAR_MAX_POIS - 1`) | units: Index
     uint8_t state;  // Status of the POI (0=undefined, 1=armed, 2=lost)
     int32_t latitude;  // Latitude of the POI | units: deg * 1e7
@@ -1807,7 +1807,7 @@ typedef struct __attribute__((packed)) {
 // Provides RC link statistics (RSSI, LQ) to the FC, typically from an MSP-based RC link (like ExpressLRS). Sent periodically by the RC link.
 // Notes: Requires `USE_RX_MSP`. Expects at least 7 bytes. Updates `rxLinkStatistics` and sets RSSI via `setRSSIFromMSP_RC()` only if `sublinkID` is 0. This message expects **no reply** (`MSP_RESULT_NO_REPLY`).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t sublinkID;  // Sublink identifier (usually 0)
     uint8_t validLink;  // Indicates if the link is currently valid (not in failsafe) | units: Boolean
     uint8_t rssiPercent;  // Uplink RSSI percentage (0-100) | units: %
@@ -1821,7 +1821,7 @@ typedef struct __attribute__((packed)) {
 // Provides additional RC link information (power levels, band, mode) to the FC from an MSP-based RC link. Sent less frequently than link stats.
 // Notes: Requires `USE_RX_MSP`. Expects at least 15 bytes. Updates `rxLinkStatistics` only if `sublinkID` is 0. Converts band/mode strings to uppercase. This message expects **no reply** (`MSP_RESULT_NO_REPLY`).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t sublinkID;  // Sublink identifier (usually 0)
     uint16_t uplinkTxPower;  // Uplink transmitter power level | units: mW
     uint16_t downlinkTxPower;  // Downlink transmitter power level | units: mW
@@ -1833,7 +1833,7 @@ typedef struct __attribute__((packed)) {
 // Provides the GPS positions (latitude, longitude, altitude) for each radar point of interest.
 // Notes: Returns the stored GPS coordinates for all radar POIs (`radar_pois[i].gps`).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int32_t poiLatitude;  // Latitude of a radar POI | units: deg * 1e7
     int32_t poiLongitude;  // Longitude of a radar POI | units: deg * 1e7
     int32_t poiAltitude;  // Altitude of a radar POI | units: cm
@@ -1843,7 +1843,7 @@ typedef struct __attribute__((packed)) {
 // Provides rangefinder data (distance, quality) from an external MSP-based sensor.
 // Notes: Requires `USE_RANGEFINDER_MSP`. Calls `mspRangefinderReceiveNewData()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t quality;  // Quality of the measurement | units: 0-255
     int32_t distanceMm;  // Measured distance. Negative value indicates out of range | units: mm
 } MSP2_SENSOR_RANGEFINDER_request_t;
@@ -1852,7 +1852,7 @@ typedef struct __attribute__((packed)) {
 // Provides optical flow data (motion, quality) from an external MSP-based sensor.
 // Notes: Requires `USE_OPFLOW_MSP`. Calls `mspOpflowReceiveNewData()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t quality;  // Quality of the measurement (0-255)
     int32_t motionX;  // Raw integrated flow value X
     int32_t motionY;  // Raw integrated flow value Y
@@ -1862,11 +1862,11 @@ typedef struct __attribute__((packed)) {
 // Provides detailed GPS data from an external MSP-based GPS module.
 // Notes: Requires `USE_GPS_PROTO_MSP`. Calls `mspGPSReceiveNewData()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t instance;  // Sensor instance number (for multi-GPS)
     uint16_t gpsWeek;  // GPS week number (0xFFFF if unavailable)
     uint32_t msTOW;  // Milliseconds Time of Week | units: ms
-    gpsFixType_e fixType;  // Enum `gpsFixType_e` Type of GPS fix | units: Enum | Enum: gpsFixType_e
+    uint8_t fixType;  // Enum `gpsFixType_e` Type of GPS fix | units: Enum | Enum: gpsFixType_e
     uint8_t satellitesInView;  // Number of satellites used in solution | units: Count
     uint16_t hPosAccuracy;  // Horizontal position accuracy estimate in milimeters | units: mm
     uint16_t vPosAccuracy;  // Vertical position accuracy estimate in milimeters | units: mm
@@ -1892,7 +1892,7 @@ typedef struct __attribute__((packed)) {
 // Provides magnetometer data from an external MSP-based compass module.
 // Notes: Requires `USE_MAG_MSP`. Calls `mspMagReceiveNewData()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t instance;  // Sensor instance number
     uint32_t timeMs;  // Timestamp from the sensor | units: ms
     int16_t magX;  // Front component reading | units: mGauss
@@ -1904,7 +1904,7 @@ typedef struct __attribute__((packed)) {
 // Provides barometer data from an external MSP-based barometer module.
 // Notes: Requires `USE_BARO_MSP`. Calls `mspBaroReceiveNewData()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t instance;  // Sensor instance number
     uint32_t timeMs;  // Timestamp from the sensor | units: ms
     float pressurePa;  // Absolute pressure | units: Pa
@@ -1915,7 +1915,7 @@ typedef struct __attribute__((packed)) {
 // Provides airspeed data from an external MSP-based pitot sensor module.
 // Notes: Requires `USE_PITOT_MSP`. Calls `mspPitotmeterReceiveNewData()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t instance;  // Sensor instance number
     uint32_t timeMs;  // Timestamp from the sensor | units: ms
     float diffPressurePa;  // Differential pressure | units: Pa
@@ -1926,7 +1926,7 @@ typedef struct __attribute__((packed)) {
 // Provides head tracker orientation data.
 // Notes: Requires `USE_HEADTRACKER` and `USE_HEADTRACKER_MSP`. Calls `mspHeadTrackerReceiverNewData()`. Payload structure needs verification from `mspHeadTrackerReceiverNewData` implementation.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t ___[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // units: Head tracker angles (e.g., int16 Roll, Pitch, Yaw in deci-degrees)
 } MSP2_SENSOR_HEADTRACKER_request_t;
 
@@ -1934,7 +1934,7 @@ typedef struct __attribute__((packed)) {
 // Provides comprehensive flight controller status, extending `MSP_STATUS_EX` with full arming flags, battery profile, and mixer profile.
 // Notes: `sensorStatus` bits follow `packSensorStatus()` (bit 15 indicates hardware failure). `profileAndBattProfile` packs the current config profile in the low nibble and the battery profile in the high nibble. `activeModes` is emitted as a little-endian array of 32-bit words sized to `CHECKBOX_ITEM_COUNT`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t cycleTime;  // Main loop cycle time | units: µs
     uint16_t i2cErrors;  // I2C errors | units: Count
     uint16_t sensorStatus;  // Bitmask: Sensor status | units: Bitmask
@@ -1949,7 +1949,7 @@ typedef struct __attribute__((packed)) {
 // Provides data from the optical flow sensor.
 // Notes: Requires `USE_OPFLOW`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t quality;  // Raw quality indicator from the sensor (`opflow.rawQuality`). 0 if `USE_OPFLOW` disabled | units: 0-255
     int16_t flowRateX;  // Optical flow rate X (roll axis) (`RADIANS_TO_DEGREES(opflow.flowRate[X])`). 0 if `USE_OPFLOW` disabled | units: degrees/s
     int16_t flowRateY;  // Optical flow rate Y (pitch axis) (`RADIANS_TO_DEGREES(opflow.flowRate[Y])`). 0 if `USE_OPFLOW` disabled | units: degrees/s
@@ -1961,7 +1961,7 @@ typedef struct __attribute__((packed)) {
 // Provides detailed analog sensor readings, superseding `MSP_ANALOG` with higher precision and additional fields.
 // Notes: Requires `USE_CURRENT_METER`/`USE_ADC` for current-related fields; values fall back to zero when unavailable. Capacity fields are reported in the units configured by `batteryMetersConfig()->capacity_unit` (mAh or mWh).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t batteryFlags;  // Bitmask: Bit0=Full on plug-in, Bit1=Use capacity thresholds, Bits2-3=`batteryState_e` (`getBatteryState()`), Bits4-7=Cell count (`getBatteryCellCount()`) | units: Bitmask
     uint16_t vbat;  // Battery voltage (`getBatteryVoltage()`) | units: 0.01V
     int16_t amperage;  // Current draw (`getAmperage()`) | units: 0.01A
@@ -1976,19 +1976,19 @@ typedef struct __attribute__((packed)) {
 // MSP2_INAV_MISC (MSPv2)
 // Retrieves miscellaneous configuration settings, superseding `MSP_MISC` with higher precision and capacity fields.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t midRc;  // Mid RC value (`PWM_RANGE_MIDDLE`) | units: PWM
     uint16_t legacyMinThrottle;  // Always 0 (Legacy)
     uint16_t maxThrottle;  // Maximum throttle command (`getMaxThrottle()`) | units: PWM
     uint16_t minCommand;  // Minimum motor command (`motorConfig()->mincommand`) | units: PWM
     uint16_t failsafeThrottle;  // Failsafe throttle level (`currentBatteryProfile->failsafe_throttle`) | units: PWM
-    gpsProvider_e gpsType;  // Enum `gpsProvider_e` GPS provider type (`gpsConfig()->provider`). 0 if `USE_GPS` disabled | units: Enum | Enum: gpsProvider_e
+    uint8_t gpsType;  // Enum `gpsProvider_e` GPS provider type (`gpsConfig()->provider`). 0 if `USE_GPS` disabled | units: Enum | Enum: gpsProvider_e
     uint8_t legacyGpsBaud;  // Always 0 (Legacy)
-    sbasMode_e gpsSbasMode;  // Enum `sbasMode_e` GPS SBAS mode (`gpsConfig()->sbasMode`). 0 if `USE_GPS` disabled | units: Enum | Enum: sbasMode_e
+    uint8_t gpsSbasMode;  // Enum `sbasMode_e` GPS SBAS mode (`gpsConfig()->sbasMode`). 0 if `USE_GPS` disabled | units: Enum | Enum: sbasMode_e
     uint8_t rssiChannel;  // RSSI channel index (1-based, 0 disables) (`rxConfig()->rssi_channel`) | units: Index
     int16_t magDeclination;  // Magnetic declination / 10 (`compassConfig()->mag_declination / 10`). 0 if `USE_MAG` disabled | units: 0.1 degrees
     uint16_t vbatScale;  // Voltage scale (`batteryMetersConfig()->voltage.scale`). 0 if `USE_ADC` disabled | units: Scale
-    batVoltageSource_e vbatSource;  // Enum `batVoltageSource_e` Voltage source (`batteryMetersConfig()->voltageSource`). 0 if `USE_ADC` disabled | units: Enum | Enum: batVoltageSource_e
+    uint8_t vbatSource;  // Enum `batVoltageSource_e` Voltage source (`batteryMetersConfig()->voltageSource`). 0 if `USE_ADC` disabled | units: Enum | Enum: batVoltageSource_e
     uint8_t cellCount;  // Configured cell count (`currentBatteryProfile->cells`). 0 if `USE_ADC` disabled | units: Count
     uint16_t vbatCellDetect;  // Cell detection voltage (`currentBatteryProfile->voltage.cellDetect`). 0 if `USE_ADC` disabled | units: 0.01V
     uint16_t vbatMinCell;  // Min cell voltage (`currentBatteryProfile->voltage.cellMin`). 0 if `USE_ADC` disabled | units: 0.01V
@@ -1997,26 +1997,26 @@ typedef struct __attribute__((packed)) {
     uint32_t capacityValue;  // Battery capacity (`currentBatteryProfile->capacity.value`) | units: mAh/mWh
     uint32_t capacityWarning;  // Capacity warning threshold (`currentBatteryProfile->capacity.warning`) | units: mAh/mWh
     uint32_t capacityCritical;  // Capacity critical threshold (`currentBatteryProfile->capacity.critical`) | units: mAh/mWh
-    batCapacityUnit_e capacityUnit;  // Enum `batCapacityUnit_e` Capacity unit (`batteryMetersConfig()->capacity_unit`) | units: Enum | Enum: batCapacityUnit_e
+    uint8_t capacityUnit;  // Enum `batCapacityUnit_e` Capacity unit (`batteryMetersConfig()->capacity_unit`) | units: Enum | Enum: batCapacityUnit_e
 } MSP2_INAV_MISC_reply_t;
 
 // MSP2_INAV_SET_MISC (MSPv2)
 // Sets miscellaneous configuration settings, superseding `MSP_SET_MISC`.
 // Notes: Expects 41 bytes. Performs validation on `vbatSource` and `capacityUnit`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t midRc;  // Ignored | units: PWM
     uint16_t legacyMinThrottle;  // Ignored
     uint16_t legacyMaxThrottle;  // Ignored
     uint16_t minCommand;  // Sets `motorConfigMutable()->mincommand` (constrained) | units: PWM
     uint16_t failsafeThrottle;  // Sets `currentBatteryProfileMutable->failsafe_throttle` (constrained) | units: PWM
-    gpsProvider_e gpsType;  // Enum `gpsProvider_e` Sets `gpsConfigMutable()->provider` (if `USE_GPS`) | units: Enum | Enum: gpsProvider_e
+    uint8_t gpsType;  // Enum `gpsProvider_e` Sets `gpsConfigMutable()->provider` (if `USE_GPS`) | units: Enum | Enum: gpsProvider_e
     uint8_t legacyGpsBaud;  // Ignored
-    sbasMode_e gpsSbasMode;  // Enum `sbasMode_e` Sets `gpsConfigMutable()->sbasMode` (if `USE_GPS`) | units: Enum | Enum: sbasMode_e
+    uint8_t gpsSbasMode;  // Enum `sbasMode_e` Sets `gpsConfigMutable()->sbasMode` (if `USE_GPS`) | units: Enum | Enum: sbasMode_e
     uint8_t rssiChannel;  // Sets `rxConfigMutable()->rssi_channel` (1-based, 0 disables) when <= `MAX_SUPPORTED_RC_CHANNEL_COUNT` | units: Index
     int16_t magDeclination;  // Sets `compassConfigMutable()->mag_declination = value * 10` (if `USE_MAG`) | units: 0.1 degrees
     uint16_t vbatScale;  // Sets `batteryMetersConfigMutable()->voltage.scale` (if `USE_ADC`) | units: Scale
-    batVoltageSource_e vbatSource;  // Enum `batVoltageSource_e` Sets `batteryMetersConfigMutable()->voltageSource` (if `USE_ADC`, validated) | units: Enum | Enum: batVoltageSource_e
+    uint8_t vbatSource;  // Enum `batVoltageSource_e` Sets `batteryMetersConfigMutable()->voltageSource` (if `USE_ADC`, validated) | units: Enum | Enum: batVoltageSource_e
     uint8_t cellCount;  // Sets `currentBatteryProfileMutable->cells` (if `USE_ADC`) | units: Count
     uint16_t vbatCellDetect;  // Sets `currentBatteryProfileMutable->voltage.cellDetect` (if `USE_ADC`) | units: 0.01V
     uint16_t vbatMinCell;  // Sets `currentBatteryProfileMutable->voltage.cellMin` (if `USE_ADC`) | units: 0.01V
@@ -2025,16 +2025,16 @@ typedef struct __attribute__((packed)) {
     uint32_t capacityValue;  // Sets `currentBatteryProfileMutable->capacity.value` | units: mAh/mWh
     uint32_t capacityWarning;  // Sets `currentBatteryProfileMutable->capacity.warning` | units: mAh/mWh
     uint32_t capacityCritical;  // Sets `currentBatteryProfileMutable->capacity.critical` | units: mAh/mWh
-    batCapacityUnit_e capacityUnit;  // Enum `batCapacityUnit_e` Sets `batteryMetersConfigMutable()->capacity_unit` (validated, updates OSD energy unit if changed) | units: Enum | Enum: batCapacityUnit_e
+    uint8_t capacityUnit;  // Enum `batCapacityUnit_e` Sets `batteryMetersConfigMutable()->capacity_unit` (validated, updates OSD energy unit if changed) | units: Enum | Enum: batCapacityUnit_e
 } MSP2_INAV_SET_MISC_request_t;
 
 // MSP2_INAV_BATTERY_CONFIG (MSPv2)
 // Retrieves the configuration specific to the battery voltage and current sensors and capacity settings for the current battery profile.
 // Notes: Fields are 0 if `USE_ADC` is not defined.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t vbatScale;  // Voltage scale (`batteryMetersConfig()->voltage.scale`) | units: Scale
-    batVoltageSource_e vbatSource;  // Enum `batVoltageSource_e` Voltage source (`batteryMetersConfig()->voltageSource`) | units: Enum | Enum: batVoltageSource_e
+    uint8_t vbatSource;  // Enum `batVoltageSource_e` Voltage source (`batteryMetersConfig()->voltageSource`) | units: Enum | Enum: batVoltageSource_e
     uint8_t cellCount;  // Configured cell count (`currentBatteryProfile->cells`) | units: Count
     uint16_t vbatCellDetect;  // Cell detection voltage (`currentBatteryProfile->voltage.cellDetect`) | units: 0.01V
     uint16_t vbatMinCell;  // Min cell voltage (`currentBatteryProfile->voltage.cellMin`) | units: 0.01V
@@ -2045,16 +2045,16 @@ typedef struct __attribute__((packed)) {
     uint32_t capacityValue;  // Battery capacity (`currentBatteryProfile->capacity.value`) | units: mAh/mWh
     uint32_t capacityWarning;  // Capacity warning threshold (`currentBatteryProfile->capacity.warning`) | units: mAh/mWh
     uint32_t capacityCritical;  // Capacity critical threshold (`currentBatteryProfile->capacity.critical`) | units: mAh/mWh
-    batCapacityUnit_e capacityUnit;  // Enum `batCapacityUnit_e` Capacity unit (`batteryMetersConfig()->capacity_unit`) | units: Enum | Enum: batCapacityUnit_e
+    uint8_t capacityUnit;  // Enum `batCapacityUnit_e` Capacity unit (`batteryMetersConfig()->capacity_unit`) | units: Enum | Enum: batCapacityUnit_e
 } MSP2_INAV_BATTERY_CONFIG_reply_t;
 
 // MSP2_INAV_SET_BATTERY_CONFIG (MSPv2)
 // Sets the battery voltage/current sensor configuration and capacity settings for the current battery profile.
 // Notes: Expects 29 bytes. Performs validation on `vbatSource` and `capacityUnit`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t vbatScale;  // Sets `batteryMetersConfigMutable()->voltage.scale` (if `USE_ADC`) | units: Scale
-    batVoltageSource_e vbatSource;  // Enum `batVoltageSource_e` Sets `batteryMetersConfigMutable()->voltageSource` (if `USE_ADC`, validated) | units: Enum | Enum: batVoltageSource_e
+    uint8_t vbatSource;  // Enum `batVoltageSource_e` Sets `batteryMetersConfigMutable()->voltageSource` (if `USE_ADC`, validated) | units: Enum | Enum: batVoltageSource_e
     uint8_t cellCount;  // Sets `currentBatteryProfileMutable->cells` (if `USE_ADC`) | units: Count
     uint16_t vbatCellDetect;  // Sets `currentBatteryProfileMutable->voltage.cellDetect` (if `USE_ADC`) | units: 0.01V
     uint16_t vbatMinCell;  // Sets `currentBatteryProfileMutable->voltage.cellMin` (if `USE_ADC`) | units: 0.01V
@@ -2065,13 +2065,13 @@ typedef struct __attribute__((packed)) {
     uint32_t capacityValue;  // Sets `currentBatteryProfileMutable->capacity.value` | units: mAh/mWh
     uint32_t capacityWarning;  // Sets `currentBatteryProfileMutable->capacity.warning` | units: mAh/mWh
     uint32_t capacityCritical;  // Sets `currentBatteryProfileMutable->capacity.critical` | units: mAh/mWh
-    batCapacityUnit_e capacityUnit;  // Enum `batCapacityUnit_e` Sets `batteryMetersConfigMutable()->capacity_unit` (validated, updates OSD energy unit if changed) | units: Enum | Enum: batCapacityUnit_e
+    uint8_t capacityUnit;  // Enum `batCapacityUnit_e` Sets `batteryMetersConfigMutable()->capacity_unit` (validated, updates OSD energy unit if changed) | units: Enum | Enum: batCapacityUnit_e
 } MSP2_INAV_SET_BATTERY_CONFIG_request_t;
 
 // MSP2_INAV_RATE_PROFILE (MSPv2)
 // Retrieves the rates and expos for the current control rate profile, including both stabilized and manual flight modes. Supersedes `MSP_RC_TUNING`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t throttleMid;  // Throttle Midpoint (`currentControlRateProfile->throttle.rcMid8`)
     uint8_t throttleExpo;  // Throttle Expo (`currentControlRateProfile->throttle.rcExpo8`)
     uint8_t dynamicThrottlePID;  // TPA value (`currentControlRateProfile->throttle.dynPID`)
@@ -2092,7 +2092,7 @@ typedef struct __attribute__((packed)) {
 // Sets the rates and expos for the current control rate profile (stabilized and manual). Supersedes `MSP_SET_RC_TUNING`.
 // Notes: Expects 15 bytes. Constraints applied to rates based on axis.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t throttleMid;  // Sets `currentControlRateProfile->throttle.rcMid8`
     uint8_t throttleExpo;  // Sets `currentControlRateProfile->throttle.rcExpo8`
     uint8_t dynamicThrottlePID;  // Sets `currentControlRateProfile->throttle.dynPID`
@@ -2113,7 +2113,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the estimated or measured airspeed.
 // Notes: Requires `USE_PITOT`; returns 0 when pitot functionality is not enabled or calibrated.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint32_t airspeed;  // Estimated/measured airspeed (`getAirspeedEstimate()`, cm/s). 0 if unavailable | units: cm/s
 } MSP2_INAV_AIR_SPEED_reply_t;
 
@@ -2121,7 +2121,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the output mapping configuration (identifies which timer outputs are used for Motors/Servos). Legacy version sending only 8-bit usage flags.
 // Notes: Superseded by `MSP2_INAV_OUTPUT_MAPPING_EXT2`. Only includes timers *not* used for PPM/PWM input.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t usageFlags;  // Timer usage flags (lower 8 bits of `timerHardware[i].usageFlags`, e.g. `TIM_USE_MOTOR`, `TIM_USE_SERVO`)
 } MSP2_INAV_OUTPUT_MAPPING_reply_t;
 
@@ -2129,7 +2129,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves configuration parameters for the multirotor braking mode feature.
 // Notes: Payload is empty if `USE_MR_BRAKING_MODE` is not defined.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t brakingSpeedThreshold;  // Speed above which braking engages (`navConfig()->mc.braking_speed_threshold`) | units: cm/s
     uint16_t brakingDisengageSpeed;  // Speed below which braking disengages (`navConfig()->mc.braking_disengage_speed`) | units: cm/s
     uint16_t brakingTimeout;  // Timeout before braking force reduces (`navConfig()->mc.braking_timeout`) | units: ms
@@ -2144,7 +2144,7 @@ typedef struct __attribute__((packed)) {
 // Sets configuration parameters for the multirotor braking mode feature.
 // Notes: Expects 14 bytes. Returns error if `USE_MR_BRAKING_MODE` is not defined.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t brakingSpeedThreshold;  // Sets `navConfigMutable()->mc.braking_speed_threshold` | units: cm/s
     uint16_t brakingDisengageSpeed;  // Sets `navConfigMutable()->mc.braking_disengage_speed` | units: cm/s
     uint16_t brakingTimeout;  // Sets `navConfigMutable()->mc.braking_timeout` | units: ms
@@ -2159,7 +2159,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves extended output mapping configuration (timer ID and usage flags). Obsolete, use `MSP2_INAV_OUTPUT_MAPPING_EXT2`.
 // Notes: Usage flags are truncated to 8 bits. `timerId` mapping is target-specific.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t timerId;  // Hardware timer identifier (e.g., `TIM1`, `TIM2`). Value depends on target
     uint8_t usageFlags;  // Timer usage flags (lower 8 bits of `timerHardware[i].usageFlags`, e.g. `TIM_USE_MOTOR`, `TIM_USE_SERVO`)
 } MSP2_INAV_OUTPUT_MAPPING_EXT_reply_t;
@@ -2168,7 +2168,7 @@ typedef struct __attribute__((packed)) {
 // Reads timer output mode overrides.
 // Notes: Non-SITL only. HARDWARE_TIMER_DEFINITION_COUNT is target specific. Returns MSP_RESULT_ACK on success, MSP_RESULT_ERROR on invalid timer index.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t timerIndex;  // 0..HARDWARE_TIMER_DEFINITION_COUNT-1
 } MSP2_INAV_TIMER_OUTPUT_MODE_request_t_dataSize_eq_1;
 
@@ -2176,21 +2176,21 @@ typedef struct __attribute__((packed)) {
 // Set the output mode override for a specific hardware timer.
 // Notes: Only available on non-SITL builds. Expects 2 bytes. Returns error if `timerIndex` is invalid.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t timerIndex;  // Index of the hardware timer definition
-    outputMode_e outputMode;  // Output mode override (`outputMode_e` enum) to set | Enum: outputMode_e
+    uint8_t outputMode;  // Output mode override (`outputMode_e` enum) to set | Enum: outputMode_e
 } MSP2_INAV_SET_TIMER_OUTPUT_MODE_request_t;
 
 // MSP2_INAV_MIXER (MSPv2)
 // Retrieves INAV-specific mixer configuration details.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t motorDirectionInverted;  // Boolean: 1 if motor direction is reversed globally (`mixerConfig()->motorDirectionInverted`)
     uint8_t reserved1;  // Always 0 (Was yaw jump prevention limit)
     uint8_t motorStopOnLow;  // Boolean: 1 if motors stop at minimum throttle (`mixerConfig()->motorstopOnLow`)
-    flyingPlatformType_e platformType;  // Enum (`mixerConfig()->platformType`) | Enum: flyingPlatformType_e
+    uint8_t platformType;  // Enum (`mixerConfig()->platformType`) | Enum: flyingPlatformType_e
     uint8_t hasFlaps;  // Boolean: 1 if the current mixer configuration includes flaps (`mixerConfig()->hasFlaps`)
-    mixerPreset_e appliedMixerPreset;  // Enum (`mixerPreset_e`): Mixer preset currently applied (`mixerConfig()->appliedMixerPreset`) WARNING: cannot figure where this is | Enum: mixerPreset_e
+    int16_t appliedMixerPreset;  // Enum (`mixerPreset_e`): Mixer preset currently applied (`mixerConfig()->appliedMixerPreset`) WARNING: cannot figure where this is | Enum: mixerPreset_e
     uint8_t maxMotors;  // Constant: Maximum motors supported (`MAX_SUPPORTED_MOTORS`)
     uint8_t maxServos;  // Constant: Maximum servos supported (`MAX_SUPPORTED_SERVOS`)
 } MSP2_INAV_MIXER_reply_t;
@@ -2199,11 +2199,11 @@ typedef struct __attribute__((packed)) {
 // Sets INAV-specific mixer configuration details.
 // Notes: Expects 9 bytes. Calls `mixerUpdateStateFlags()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t motorDirectionInverted;  // Sets `mixerConfigMutable()->motorDirectionInverted`
     uint8_t reserved1;  // Ignored
     uint8_t motorStopOnLow;  // Sets `mixerConfigMutable()->motorstopOnLow`
-    flyingPlatformType_e platformType;  // Sets `mixerConfigMutable()->platformType` | Enum: flyingPlatformType_e
+    uint8_t platformType;  // Sets `mixerConfigMutable()->platformType` | Enum: flyingPlatformType_e
     uint8_t hasFlaps;  // Sets `mixerConfigMutable()->hasFlaps`
     int16_t appliedMixerPreset;  // Sets `mixerConfigMutable()->appliedMixerPreset`
     uint8_t maxMotors;  // Ignored
@@ -2214,11 +2214,11 @@ typedef struct __attribute__((packed)) {
 // Retrieves OSD layout metadata or item positions for specific layouts/items.
 // Notes: Requires `USE_OSD`. Returns `MSP_RESULT_ACK` on success, `MSP_RESULT_ERROR` if indexes are out of range.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t layoutIndex;  // Layout index (0 to `OSD_LAYOUT_COUNT - 1`)
 } MSP2_INAV_OSD_LAYOUTS_request_t_dataSize_eq_1;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t layoutIndex;  // Layout index (0 to `OSD_LAYOUT_COUNT - 1`)
     uint16_t itemIndex;  // OSD item index (0 to `OSD_ITEM_COUNT - 1`)
 } MSP2_INAV_OSD_LAYOUTS_request_t_dataSize_eq_3;
@@ -2227,7 +2227,7 @@ typedef struct __attribute__((packed)) {
 // Sets the position of a single OSD item within a specific layout.
 // Notes: Requires `USE_OSD`. Expects 4 bytes. Returns error if indexes are invalid. If the modified layout is not the currently active one, it temporarily overrides the active layout for 10 seconds to show the change. Otherwise, triggers a full OSD redraw.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t layoutIndex;  // Index of the OSD layout (0 to `OSD_LAYOUT_COUNT - 1`) | units: Index
     uint8_t itemIndex;  // Index of the OSD item | units: Index
     uint16_t itemPosition;  // Packed X/Y position using `OSD_POS(x, y)` with `OSD_VISIBLE_FLAG` bit | units: Coordinates
@@ -2237,7 +2237,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves OSD alarm threshold settings.
 // Notes: Requires `USE_OSD`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t rssiAlarm;  // RSSI alarm threshold (`osdConfig()->rssi_alarm`) | units: %
     uint16_t timerAlarm;  // Timer alarm threshold (`osdConfig()->time_alarm`) | units: seconds
     uint16_t altAlarm;  // Altitude alarm threshold (`osdConfig()->alt_alarm`) | units: meters
@@ -2259,7 +2259,7 @@ typedef struct __attribute__((packed)) {
 // Sets OSD alarm threshold settings.
 // Notes: Requires `USE_OSD`. Expects 24 bytes. ADSB alarms are not settable via this message.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t rssiAlarm;  // Sets `osdConfigMutable()->rssi_alarm | units: %
     uint16_t timerAlarm;  // Sets `osdConfigMutable()->time_alarm | units: seconds
     uint16_t altAlarm;  // Sets `osdConfigMutable()->alt_alarm | units: meters
@@ -2279,39 +2279,39 @@ typedef struct __attribute__((packed)) {
 // Retrieves OSD display preferences (video system, units, styles, etc.).
 // Notes: Requires `USE_OSD`.
 
-typedef struct __attribute__((packed)) {
-    videoSystem_e videoSystem;  // Enum `videoSystem_e`: Video system (Auto/PAL/NTSC) (`osdConfig()->video_system`) | Enum: videoSystem_e
+typedef struct MSP_PACKED {
+    uint8_t videoSystem;  // Enum `videoSystem_e`: Video system (Auto/PAL/NTSC) (`osdConfig()->video_system`) | Enum: videoSystem_e
     uint8_t mainVoltageDecimals;  // Count: Decimal places for main voltage display (`osdConfig()->main_voltage_decimals`)
     uint8_t ahiReverseRoll;  // Boolean: Reverse roll direction on Artificial Horizon (`osdConfig()->ahi_reverse_roll`)
-    osd_crosshairs_style_e crosshairsStyle;  // Enum `osd_crosshairs_style_e`: Style of the center crosshairs (`osdConfig()->crosshairs_style`) | Enum: osd_crosshairs_style_e
-    osd_sidebar_scroll_e leftSidebarScroll;  // Enum `osd_sidebar_scroll_e`: Left sidebar scroll behavior (`osdConfig()->left_sidebar_scroll`) | Enum: osd_sidebar_scroll_e
-    osd_sidebar_scroll_e rightSidebarScroll;  // Enum `osd_sidebar_scroll_e`: Right sidebar scroll behavior (`osdConfig()->right_sidebar_scroll`) | Enum: osd_sidebar_scroll_e
+    uint8_t crosshairsStyle;  // Enum `osd_crosshairs_style_e`: Style of the center crosshairs (`osdConfig()->crosshairs_style`) | Enum: osd_crosshairs_style_e
+    uint8_t leftSidebarScroll;  // Enum `osd_sidebar_scroll_e`: Left sidebar scroll behavior (`osdConfig()->left_sidebar_scroll`) | Enum: osd_sidebar_scroll_e
+    uint8_t rightSidebarScroll;  // Enum `osd_sidebar_scroll_e`: Right sidebar scroll behavior (`osdConfig()->right_sidebar_scroll`) | Enum: osd_sidebar_scroll_e
     uint8_t sidebarScrollArrows;  // Boolean: Show arrows for scrollable sidebars (`osdConfig()->sidebar_scroll_arrows`)
-    osd_unit_e units;  // Enum: `osd_unit_e` Measurement units (Metric/Imperial) (`osdConfig()->units`) | Enum: osd_unit_e
-    osd_stats_energy_unit_e statsEnergyUnit;  // Enum `osd_stats_energy_unit_e`: Unit for energy display in post-flight stats (`osdConfig()->stats_energy_unit`) | Enum: osd_stats_energy_unit_e
+    uint8_t units;  // Enum: `osd_unit_e` Measurement units (Metric/Imperial) (`osdConfig()->units`) | Enum: osd_unit_e
+    uint8_t statsEnergyUnit;  // Enum `osd_stats_energy_unit_e`: Unit for energy display in post-flight stats (`osdConfig()->stats_energy_unit`) | Enum: osd_stats_energy_unit_e
 } MSP2_INAV_OSD_PREFERENCES_reply_t;
 
 // MSP2_INAV_OSD_SET_PREFERENCES (MSPv2)
 // Sets OSD display preferences.
 // Notes: Requires `USE_OSD`. Expects 9 bytes. Triggers a full OSD redraw.
 
-typedef struct __attribute__((packed)) {
-    videoSystem_e videoSystem;  // Sets `osdConfigMutable()->video_system` | Enum: videoSystem_e
+typedef struct MSP_PACKED {
+    uint8_t videoSystem;  // Sets `osdConfigMutable()->video_system` | Enum: videoSystem_e
     uint8_t mainVoltageDecimals;  // Sets `osdConfigMutable()->main_voltage_decimals`
     uint8_t ahiReverseRoll;  // Sets `osdConfigMutable()->ahi_reverse_roll`
-    osd_crosshairs_style_e crosshairsStyle;  // Sets `osdConfigMutable()->crosshairs_style` | Enum: osd_crosshairs_style_e
-    osd_sidebar_scroll_e leftSidebarScroll;  // Sets `osdConfigMutable()->left_sidebar_scroll` | Enum: osd_sidebar_scroll_e
-    osd_sidebar_scroll_e rightSidebarScroll;  // Sets `osdConfigMutable()->right_sidebar_scroll` | Enum: osd_sidebar_scroll_e
+    uint8_t crosshairsStyle;  // Sets `osdConfigMutable()->crosshairs_style` | Enum: osd_crosshairs_style_e
+    uint8_t leftSidebarScroll;  // Sets `osdConfigMutable()->left_sidebar_scroll` | Enum: osd_sidebar_scroll_e
+    uint8_t rightSidebarScroll;  // Sets `osdConfigMutable()->right_sidebar_scroll` | Enum: osd_sidebar_scroll_e
     uint8_t sidebarScrollArrows;  // Sets `osdConfigMutable()->sidebar_scroll_arrows`
-    osd_unit_e units;  // Sets `osdConfigMutable()->units` (enum `osd_unit_e`) | Enum: osd_unit_e
-    osd_stats_energy_unit_e statsEnergyUnit;  // Sets `osdConfigMutable()->stats_energy_unit` | Enum: osd_stats_energy_unit_e
+    uint8_t units;  // Sets `osdConfigMutable()->units` (enum `osd_unit_e`) | Enum: osd_unit_e
+    uint8_t statsEnergyUnit;  // Sets `osdConfigMutable()->stats_energy_unit` | Enum: osd_stats_energy_unit_e
 } MSP2_INAV_OSD_SET_PREFERENCES_request_t;
 
 // MSP2_INAV_SELECT_BATTERY_PROFILE (MSPv2)
 // Selects the active battery profile and saves configuration.
 // Notes: Expects 1 byte. Will fail if armed. Calls `setConfigBatteryProfileAndWriteEEPROM()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t batteryProfileIndex;  // Index of the battery profile to activate (0-based)
 } MSP2_INAV_SELECT_BATTERY_PROFILE_request_t;
 
@@ -2319,7 +2319,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves values from the firmware's 32-bit `debug[]` array. Supersedes `MSP_DEBUG`.
 // Notes: `DEBUG32_VALUE_COUNT` is usually 8.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int32_t debugValues[DEBUG32_VALUE_COUNT];  // Values from the `debug` array (signed, typically 8 entries) | length via DEBUG32_VALUE_COUNT
 } MSP2_INAV_DEBUG_reply_t;
 
@@ -2327,9 +2327,9 @@ typedef struct __attribute__((packed)) {
 // Retrieves the Blackbox configuration. Supersedes `MSP_BLACKBOX_CONFIG`.
 // Notes: If `USE_BLACKBOX` is disabled, only the first four fields are returned (all zero).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t blackboxSupported;  // Boolean: 1 if Blackbox is supported (`USE_BLACKBOX`), 0 otherwise
-    BlackboxDevice blackboxDevice;  // Enum `BlackboxDevice`: Target device for logging (`blackboxConfig()->device`). 0 if not supported | Enum: BlackboxDevice
+    uint8_t blackboxDevice;  // Enum `BlackboxDevice`: Target device for logging (`blackboxConfig()->device`). 0 if not supported | Enum: BlackboxDevice
     uint16_t blackboxRateNum;  // Numerator for logging rate divider (`blackboxConfig()->rate_num`). 0 if not supported
     uint16_t blackboxRateDenom;  // Denominator for logging rate divider (`blackboxConfig()->rate_denom`). 0 if not supported
     uint32_t blackboxIncludeFlags;  // Bitmask: Flags for fields included/excluded from logging (`blackboxConfig()->includeFlags`)
@@ -2339,8 +2339,8 @@ typedef struct __attribute__((packed)) {
 // Sets the Blackbox configuration. Supersedes `MSP_SET_BLACKBOX_CONFIG`.
 // Notes: Requires `USE_BLACKBOX`. Expects 9 bytes. Returns error if Blackbox is currently logging (`!blackboxMayEditConfig()`).
 
-typedef struct __attribute__((packed)) {
-    BlackboxDevice blackboxDevice;  // Sets `blackboxConfigMutable()->device` | Enum: BlackboxDevice
+typedef struct MSP_PACKED {
+    uint8_t blackboxDevice;  // Sets `blackboxConfigMutable()->device` | Enum: BlackboxDevice
     uint16_t blackboxRateNum;  // Sets `blackboxConfigMutable()->rate_num`
     uint16_t blackboxRateDenom;  // Sets `blackboxConfigMutable()->rate_denom`
     uint32_t blackboxIncludeFlags;  // Sets `blackboxConfigMutable()->includeFlags`
@@ -2350,8 +2350,8 @@ typedef struct __attribute__((packed)) {
 // Retrieves the configuration for all onboard temperature sensors.
 // Notes: Requires `USE_TEMPERATURE_SENSOR`.
 
-typedef struct __attribute__((packed)) {
-    tempSensorType_e type;  // Enum (`tempSensorType_e`): Type of the temperature sensor | Enum: tempSensorType_e
+typedef struct MSP_PACKED {
+    uint8_t type;  // Enum (`tempSensorType_e`): Type of the temperature sensor | Enum: tempSensorType_e
     uint64_t address;  // Sensor address/ID (e.g., for 1-Wire sensors)
     int16_t alarmMin;  // Min temperature alarm threshold (`sensorConfig->alarm_min`) | units: 0.1°C
     int16_t alarmMax;  // Max temperature alarm threshold (`sensorConfig->alarm_max`) | units: 0.1°C
@@ -2363,8 +2363,8 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration for all onboard temperature sensors.
 // Notes: Requires `USE_TEMPERATURE_SENSOR`. Payload must include `MAX_TEMP_SENSORS` consecutive `tempSensorConfig_t` structures (labels are uppercased).
 
-typedef struct __attribute__((packed)) {
-    tempSensorType_e type;  // Sets sensor type (`tempSensorType_e`) | Enum: tempSensorType_e
+typedef struct MSP_PACKED {
+    uint8_t type;  // Sets sensor type (`tempSensorType_e`) | Enum: tempSensorType_e
     uint64_t address;  // Sets sensor address/ID
     int16_t alarmMin;  // Sets min alarm threshold (`tempSensorConfigMutable(index)->alarm_min`) | units: 0.1°C
     int16_t alarmMax;  // Sets max alarm threshold (`tempSensorConfigMutable(index)->alarm_max`) | units: 0.1°C
@@ -2376,7 +2376,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the current readings from all configured temperature sensors.
 // Notes: Requires `USE_TEMPERATURE_SENSOR`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t temperature;  // Current temperature reading. -1000 if sensor is invalid or reading failed | units: 0.1°C
 } MSP2_INAV_TEMPERATURES_reply_t;
 
@@ -2384,10 +2384,10 @@ typedef struct __attribute__((packed)) {
 // Handles Hardware-in-the-Loop (HITL) simulation data exchange. Receives simulated sensor data and options, sends back control outputs and debug info.
 // Notes: Requires `USE_SIMULATOR`. Complex message handling state changes for enabling/disabling HITL. Sensor data is injected directly. OSD data is sent using a custom RLE scheme. See `simulatorData` struct and associated code for details.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t simulatorVersion;  // Version of the simulator protocol (`SIMULATOR_MSP_VERSION`)
     uint8_t simulatorFlags_t;  // Bitmask: Options for HITL (`HITL_*` flags) | units: Bitmask
-    gpsFixType_e gpsFixType;  // Enum `gpsFixType_e` Type of GPS fix (If `HITL_HAS_NEW_GPS_DATA`) | units: Enum | Enum: gpsFixType_e
+    uint8_t gpsFixType;  // Enum `gpsFixType_e` Type of GPS fix (If `HITL_HAS_NEW_GPS_DATA`) | units: Enum | Enum: gpsFixType_e
     uint8_t gpsNumSat;  // (If `HITL_HAS_NEW_GPS_DATA`) Simulated satellite count
     int32_t gpsLat;  // (If `HITL_HAS_NEW_GPS_DATA`) Simulated latitude (1e7 deg)
     int32_t gpsLon;  // (If `HITL_HAS_NEW_GPS_DATA`) Simulated longitude (1e7 deg)
@@ -2415,7 +2415,7 @@ typedef struct __attribute__((packed)) {
     uint8_t extFlags;  // (If `HITL_EXTENDED_FLAGS`) Additional flags (upper 8 bits)
 } MSP_SIMULATOR_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint16_t stabilizedRoll;  // Stabilized Roll command output (-500 to 500)
     uint16_t stabilizedPitch;  // Stabilized Pitch command output (-500 to 500)
     uint16_t stabilizedYaw;  // Stabilized Yaw command output (-500 to 500)
@@ -2437,14 +2437,14 @@ typedef struct __attribute__((packed)) {
 // Retrieves the custom servo mixer rules, including programming framework condition IDs, for primary and secondary mixer profiles. Supersedes `MSP_SERVO_MIX_RULES`.
 // Notes: `conditionId` requires `USE_PROGRAMMING_FRAMEWORK`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t targetChannel;  // Servo output channel index (0-based)
-    inputSource_e inputSource;  // Enum `inputSource_e` Input source | Enum: inputSource_e
+    uint8_t inputSource;  // Enum `inputSource_e` Input source | Enum: inputSource_e
     int16_t rate;  // Mixing rate/weight
     uint8_t speed;  // Speed/Slew rate limit (0-100)
     int8_t conditionId;  // Logic Condition ID (0 to `MAX_LOGIC_CONDITIONS - 1`, or 255/-1 if none/disabled)
     uint8_t p2TargetChannel;  // (Optional) Profile 2 Target channel
-    inputSource_e p2InputSource;  // (Optional) Profile 2 Enum `inputSource_e` Input source | Enum: inputSource_e
+    uint8_t p2InputSource;  // (Optional) Profile 2 Enum `inputSource_e` Input source | Enum: inputSource_e
     int16_t p2Rate;  // (Optional) Profile 2 Rate
     uint8_t p2Speed;  // (Optional) Profile 2 Speed
     int8_t p2ConditionId;  // (Optional) Profile 2 Logic Condition ID
@@ -2454,10 +2454,10 @@ typedef struct __attribute__((packed)) {
 // Sets a single custom servo mixer rule, including programming framework condition ID. Supersedes `MSP_SET_SERVO_MIX_RULE`.
 // Notes: Expects 7 bytes. Returns error if index invalid. Calls `loadCustomServoMixer()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t ruleIndex;  // Index of the rule to set (0 to `MAX_SERVO_RULES - 1`)
     uint8_t targetChannel;  // Servo output channel index
-    inputSource_e inputSource;  // Enum `inputSource_e` Input source | Enum: inputSource_e
+    uint8_t inputSource;  // Enum `inputSource_e` Input source | Enum: inputSource_e
     int16_t rate;  // Mixing rate/weight
     uint8_t speed;  // Speed/Slew rate limit (0-100)
     int8_t conditionId;  // Logic Condition ID (255/-1 if none). Ignored if `USE_PROGRAMMING_FRAMEWORK` is disabled
@@ -2467,13 +2467,13 @@ typedef struct __attribute__((packed)) {
 // Retrieves the configuration of all defined Logic Conditions. Requires `USE_PROGRAMMING_FRAMEWORK`. See `logicCondition_t` structure.
 // Notes: Deprecated, causes buffer overflow for 14*64 bytes
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t enabled;  // Boolean: 1 if the condition is enabled
     int8_t activatorId;  // Activator condition ID (-1/255 if none)
-    logicOperation_e operation;  // Enum `logicOperation_e` Logical operation (AND, OR, XOR, etc.) | Enum: logicOperation_e
-    logicOperandType_e operandAType;  // Enum `logicOperandType_e` Type of the first operand (Flight Mode, GVAR, etc.) | Enum: logicOperandType_e
+    uint8_t operation;  // Enum `logicOperation_e` Logical operation (AND, OR, XOR, etc.) | Enum: logicOperation_e
+    uint8_t operandAType;  // Enum `logicOperandType_e` Type of the first operand (Flight Mode, GVAR, etc.) | Enum: logicOperandType_e
     int32_t operandAValue;  // Value/ID of the first operand
-    logicOperandType_e operandBType;  // Enum `logicOperandType_e`: Type of the second operand | Enum: logicOperandType_e
+    uint8_t operandBType;  // Enum `logicOperandType_e`: Type of the second operand | Enum: logicOperandType_e
     int32_t operandBValue;  // Value/ID of the second operand
     uint8_t flags;  // Bitmask: Condition flags (`logicConditionFlags_e`) | units: Bitmask
 } MSP2_INAV_LOGIC_CONDITIONS_reply_t;
@@ -2482,14 +2482,14 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration for a single Logic Condition by its index.
 // Notes: Requires `USE_PROGRAMMING_FRAMEWORK`. Expects 15 bytes. Returns error if index is invalid.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t conditionIndex;  // Index of the condition to set (0 to `MAX_LOGIC_CONDITIONS - 1`)
     uint8_t enabled;  // Boolean: 1 to enable the condition
     int8_t activatorId;  // Activator condition ID (-1/255 if none)
-    logicOperation_e operation;  // Enum `logicOperation_e` Logical operation | Enum: logicOperation_e
-    logicOperandType_e operandAType;  // Enum `logicOperandType_e` Type of operand A | Enum: logicOperandType_e
+    uint8_t operation;  // Enum `logicOperation_e` Logical operation | Enum: logicOperation_e
+    uint8_t operandAType;  // Enum `logicOperandType_e` Type of operand A | Enum: logicOperandType_e
     int32_t operandAValue;  // Value/ID of operand A
-    logicOperandType_e operandBType;  // Enum `logicOperandType_e` Type of operand B | Enum: logicOperandType_e
+    uint8_t operandBType;  // Enum `logicOperandType_e` Type of operand B | Enum: logicOperandType_e
     int32_t operandBValue;  // Value/ID of operand B
     uint8_t flags;  // Bitmask: Condition flags (`logicConditionFlags_e`) | units: Bitmask
 } MSP2_INAV_SET_LOGIC_CONDITIONS_request_t;
@@ -2502,7 +2502,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the current evaluated status (true/false or numerical value) of all logic conditions.
 // Notes: Requires `USE_PROGRAMMING_FRAMEWORK`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int32_t conditionValues[MAX_LOGIC_CONDITIONS];  // Array of current values for each logic condition (`logicConditionGetValue(i)`). 1 for true, 0 for false, or numerical value depending on operation | length via MAX_LOGIC_CONDITIONS
 } MSP2_INAV_LOGIC_CONDITIONS_STATUS_reply_t;
 
@@ -2510,7 +2510,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the current values of all Global Variables (GVARS).
 // Notes: Requires `USE_PROGRAMMING_FRAMEWORK`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int32_t gvarValues[MAX_GLOBAL_VARIABLES];  // Array of current values for each global variable (`gvGet(i)`) | length via MAX_GLOBAL_VARIABLES
 } MSP2_INAV_GVAR_STATUS_reply_t;
 
@@ -2518,11 +2518,11 @@ typedef struct __attribute__((packed)) {
 // Retrieves the configuration of all Programming PIDs.
 // Notes: Requires `USE_PROGRAMMING_FRAMEWORK`. See `programmingPid_t` structure.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t enabled;  // Boolean: 1 if the PID is enabled
-    logicOperandType_e setpointType;  // Enum (`logicOperandType_e`) Type of the setpoint source | Enum: logicOperandType_e
+    uint8_t setpointType;  // Enum (`logicOperandType_e`) Type of the setpoint source | Enum: logicOperandType_e
     int32_t setpointValue;  // Value/ID of the setpoint source
-    logicOperandType_e measurementType;  // Enum (`logicOperandType_e`) Type of the measurement source | Enum: logicOperandType_e
+    uint8_t measurementType;  // Enum (`logicOperandType_e`) Type of the measurement source | Enum: logicOperandType_e
     int32_t measurementValue;  // Value/ID of the measurement source
     uint16_t gainP;  // Proportional gain
     uint16_t gainI;  // Integral gain
@@ -2534,12 +2534,12 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration for a single Programming PID by its index.
 // Notes: Requires `USE_PROGRAMMING_FRAMEWORK`. Expects 20 bytes. Returns error if index is invalid.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t pidIndex;  // Index of the Programming PID to set (0 to `MAX_PROGRAMMING_PID_COUNT - 1`)
     uint8_t enabled;  // Boolean: 1 to enable the PID
-    logicOperandType_e setpointType;  // Enum (`logicOperandType_e`) Type of the setpoint source | Enum: logicOperandType_e
+    uint8_t setpointType;  // Enum (`logicOperandType_e`) Type of the setpoint source | Enum: logicOperandType_e
     int32_t setpointValue;  // Value/ID of the setpoint source
-    logicOperandType_e measurementType;  // Enum (`logicOperandType_e`) Type of the measurement source | Enum: logicOperandType_e
+    uint8_t measurementType;  // Enum (`logicOperandType_e`) Type of the measurement source | Enum: logicOperandType_e
     int32_t measurementValue;  // Value/ID of the measurement source
     uint16_t gainP;  // Proportional gain
     uint16_t gainI;  // Integral gain
@@ -2551,7 +2551,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the current output value of all Programming PIDs.
 // Notes: Requires `USE_PROGRAMMING_FRAMEWORK`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int32_t pidOutputs[MAX_PROGRAMMING_PID_COUNT];  // Array of current output values for each Programming PID (`programmingPidGetOutput(i)`, signed) | length via MAX_PROGRAMMING_PID_COUNT
 } MSP2_INAV_PROGRAMMING_PID_STATUS_reply_t;
 
@@ -2559,7 +2559,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the standard PID controller gains (P, I, D, FF) for the current PID profile.
 // Notes: `PID_ITEM_COUNT` defines the number of standard PID controllers (Roll, Pitch, Yaw, Alt, Vel, etc.). Updates from EZ-Tune if enabled.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t P;  // Proportional gain (`pidBank()->pid[i].P`), constrained 0-255
     uint8_t I;  // Integral gain (`pidBank()->pid[i].I`), constrained 0-255
     uint8_t D;  // Derivative gain (`pidBank()->pid[i].D`), constrained 0-255
@@ -2570,7 +2570,7 @@ typedef struct __attribute__((packed)) {
 // Sets the standard PID controller gains (P, I, D, FF) for the current PID profile.
 // Notes: Expects `PID_ITEM_COUNT * 4` bytes. Calls `schedulePidGainsUpdate()` and `navigationUsePIDs()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t P;  // Sets Proportional gain (`pidBankMutable()->pid[i].P`)
     uint8_t I;  // Sets Integral gain (`pidBankMutable()->pid[i].I`)
     uint8_t D;  // Sets Derivative gain (`pidBankMutable()->pid[i].D`)
@@ -2585,7 +2585,7 @@ typedef struct __attribute__((packed)) {
 // Prepares the flight controller to receive a firmware update via MSP.
 // Notes: Requires `MSP_FIRMWARE_UPDATE`. Expects 4 bytes. Returns error if preparation fails (e.g., no storage, invalid size). Calls `firmwareUpdatePrepare()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint32_t firmwareSize;  // Total size of the incoming firmware file in bytes
 } MSP2_INAV_FWUPDT_PREPARE_request_t;
 
@@ -2593,7 +2593,7 @@ typedef struct __attribute__((packed)) {
 // Stores a chunk of firmware data received via MSP.
 // Notes: Requires `MSP_FIRMWARE_UPDATE`. Returns error if storage fails (e.g., out of space, checksum error). Called repeatedly until the entire firmware is transferred. Calls `firmwareUpdateStore()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t firmwareChunk[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Chunk of firmware data
 } MSP2_INAV_FWUPDT_STORE_request_t;
 
@@ -2601,7 +2601,7 @@ typedef struct __attribute__((packed)) {
 // Executes the firmware update process (flashes the stored firmware and reboots).
 // Notes: Requires `MSP_FIRMWARE_UPDATE`. Expects 1 byte. Returns error if update cannot start (e.g., not fully received). Calls `firmwareUpdateExec()`. If successful, the device will reboot into the new firmware.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t updateType;  // Type of update (e.g., full flash, specific section - currently ignored/unused)
 } MSP2_INAV_FWUPDT_EXEC_request_t;
 
@@ -2617,11 +2617,11 @@ typedef struct __attribute__((packed)) {
 // Get or Set configuration for a specific Safe Home location.
 // Notes: Requires `USE_SAFE_HOME`. Used by `mspFcSafeHomeOutCommand`. See `MSP2_INAV_SET_SAFEHOME` for setting.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t safehomeIndex;  // Index of the safe home location (0 to `MAX_SAFE_HOMES - 1`)
 } MSP2_INAV_SAFEHOME_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t safehomeIndex;  // Index requested
     uint8_t enabled;  // Boolean: 1 if this safe home is enabled
     int32_t latitude;  // Latitude (1e7 deg)
@@ -2632,7 +2632,7 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration for a specific Safe Home location.
 // Notes: Requires `USE_SAFE_HOME`. Expects 10 bytes. Returns error if index invalid. Resets corresponding FW autoland approach if `USE_FW_AUTOLAND` is enabled.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t safehomeIndex;  // Index of the safe home location (0 to `MAX_SAFE_HOMES - 1`)
     uint8_t enabled;  // Boolean: 1 to enable this safe home
     int32_t latitude;  // Latitude (1e7 deg)
@@ -2642,7 +2642,7 @@ typedef struct __attribute__((packed)) {
 // MSP2_INAV_MISC2 (MSPv2)
 // Retrieves miscellaneous runtime information including timers and throttle status.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint32_t uptimeSeconds;  // Time since boot (`micros() / 1000000`) | units: Seconds
     uint32_t flightTimeSeconds;  // Accumulated flight time (`getFlightTime()`) | units: Seconds
     uint8_t throttlePercent;  // Current throttle output percentage (`getThrottlePercent(true)`) | units: %
@@ -2653,17 +2653,17 @@ typedef struct __attribute__((packed)) {
 // Gets the configuration for a single Logic Condition by its index.
 // Notes: Requires `USE_PROGRAMMING_FRAMEWORK`. Used by `mspFcLogicConditionCommand`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t conditionIndex;  // Index of the condition to retrieve (0 to `MAX_LOGIC_CONDITIONS - 1`)
 } MSP2_INAV_LOGIC_CONDITIONS_SINGLE_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t enabled;  // Boolean: 1 if enabled
     int8_t activatorId;  // Activator ID (-1/255 if none)
-    logicOperation_e operation;  // Enum `logicOperation_e` Logical operation | Enum: logicOperation_e
-    logicOperandType_e operandAType;  // Enum `logicOperandType_e` Type of operand A | Enum: logicOperandType_e
+    uint8_t operation;  // Enum `logicOperation_e` Logical operation | Enum: logicOperation_e
+    uint8_t operandAType;  // Enum `logicOperandType_e` Type of operand A | Enum: logicOperandType_e
     int32_t operandAValue;  // Value/ID of operand A
-    logicOperandType_e operandBType;  // Enum `logicOperandType_e` Type of operand B | Enum: logicOperandType_e
+    uint8_t operandBType;  // Enum `logicOperandType_e` Type of operand B | Enum: logicOperandType_e
     int32_t operandBValue;  // Value/ID of operand B
     uint8_t flags;  // Bitmask: Condition flags (`logicConditionFlags_e`) | units: Bitmask
 } MSP2_INAV_LOGIC_CONDITIONS_SINGLE_reply_t;
@@ -2672,7 +2672,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the RPM reported by each ESC via telemetry.
 // Notes: Requires `USE_ESC_SENSOR`. Payload size depends on the number of detected motors with telemetry.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint32_t escRpm;  // RPM reported by the ESC | units: RPM
 } MSP2_INAV_ESC_RPM_reply_t;
 
@@ -2680,16 +2680,44 @@ typedef struct __attribute__((packed)) {
 // Retrieves the full telemetry data structure reported by each ESC.
 // Notes: Requires `USE_ESC_SENSOR`. See `escSensorData_t` in `sensors/esc_sensor.h` for the exact structure fields.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t motorCount;  // Number of motors reporting telemetry (`getMotorCount()`)
     escSensorData_t escData[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Array of `escSensorData_t` structures containing voltage, current, temp, RPM, errors etc. for each ESC
 } MSP2_INAV_ESC_TELEM_reply_t;
+
+// MSP2_INAV_DRONECAN_NODES (MSPv2)
+// Returns the list of all detected DroneCAN nodes with their current status.
+// Notes: Requires `USE_DRONECAN`. Response is `nodeCount` followed by `nodeCount` records of 7 bytes each: nodeID(1)+health(1)+mode(1)+last_seen_ms(4). Maximum payload 1 + (DRONECAN_MAX_NODES * 7) = 225 bytes. Full node detail including uptime, vendor status, and name is available via MSP2_INAV_DRONECAN_NODE_INFO.
+
+typedef struct MSP_PACKED {
+    uint8_t nodeCount;  // Number of detected DroneCAN nodes
+    dronecanNodeStatus_t nodeData[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Array of per-node status records, one per detected node. Each record: nodeID(1)+health(1)+mode(1)+last_seen_ms(4) = 7 bytes. Full detail available via MSP2_INAV_DRONECAN_NODE_INFO.
+} MSP2_INAV_DRONECAN_NODES_reply_t;
+
+// MSP2_INAV_DRONECAN_NODE_INFO (MSPv2)
+// Returns full status detail for a single DroneCAN node by ID.
+// Notes: Requires `USE_DRONECAN`. Returns `MSP_RESULT_ERROR` if the requested node ID is not in the node table.
+
+typedef struct MSP_PACKED {
+    uint8_t nodeID;  // DroneCAN node ID to query (1-127)
+} MSP2_INAV_DRONECAN_NODE_INFO_request_t;
+
+typedef struct MSP_PACKED {
+    uint8_t nodeID;  // DroneCAN node ID
+    uint8_t health;  // Node health: 0=OK, 1=WARNING, 2=ERROR, 3=CRITICAL
+    uint8_t mode;  // Node mode: 0=OPERATIONAL, 1=INITIALIZATION, 2=MAINTENANCE, 3=SOFTWARE_UPDATE, 7=OFFLINE
+    uint32_t uptime_sec;  // Node uptime in seconds | units: s
+    uint16_t vendor_status_code;  // Vendor-specific status code
+    uint32_t last_seen_ms;  // FC millisecond timestamp when this node was last seen | units: ms
+    uint8_t name_len;  // Length of node name string (0 if unknown)
+    char name[32];  // Node name up to 32 bytes, zero-padded
+} MSP2_INAV_DRONECAN_NODE_INFO_reply_t;
 
 // MSP2_INAV_LED_STRIP_CONFIG_EX (MSPv2)
 // Retrieves the full configuration for each LED on the strip using the `ledConfig_t` structure. Supersedes `MSP_LED_STRIP_CONFIG`.
 // Notes: Requires `USE_LED_STRIP`. See `ledConfig_t` in `io/ledstrip.h` for structure fields (position, function, overlay, color, direction, params).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     ledConfig_t ledConfig;  // Raw `ledConfig_t` structure (6 bytes) holding position, function, overlay, color, direction, and params bitfields (`io/ledstrip.h`).
 } MSP2_INAV_LED_STRIP_CONFIG_EX_reply_t;
 
@@ -2697,7 +2725,7 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration for a single LED on the strip using the `ledConfig_t` structure. Supersedes `MSP_SET_LED_STRIP_CONFIG`.
 // Notes: Requires `USE_LED_STRIP`. Expects `1 + sizeof(ledConfig_t)` bytes. Returns error if index invalid. Calls `reevaluateLedConfig()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t ledIndex;  // Index of the LED to configure (0 to `LED_MAX_STRIP_LENGTH - 1`)
     ledConfig_t ledConfig;  // Raw `ledConfig_t` structure (6 bytes) mirroring the firmware layout.
 } MSP2_INAV_SET_LED_STRIP_CONFIG_EX_request_t;
@@ -2706,15 +2734,15 @@ typedef struct __attribute__((packed)) {
 // Get or Set configuration for a specific Fixed Wing Autoland approach.
 // Notes: Requires `USE_FW_AUTOLAND`. Used by `mspFwApproachOutCommand`. See `MSP2_INAV_SET_FW_APPROACH` for setting.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t approachIndex;  // Index of the approach setting (0 to `MAX_FW_LAND_APPOACH_SETTINGS - 1`)
 } MSP2_INAV_FW_APPROACH_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t approachIndex;  // Index requested | units: Index
     int32_t approachAlt;  // Signed altitude for the approach phase (`navFwAutolandApproach_t.approachAlt`) | units: cm
     int32_t landAlt;  // Signed altitude for the final landing phase (`navFwAutolandApproach_t.landAlt`) | units: cm
-    fwAutolandApproachDirection_e approachDirection;  // Enum `fwAutolandApproachDirection_e`: Direction of approach (From WP, Specific Heading) | units: Enum | Enum: fwAutolandApproachDirection_e
+    uint8_t approachDirection;  // Enum `fwAutolandApproachDirection_e`: Direction of approach (From WP, Specific Heading) | units: Enum | Enum: fwAutolandApproachDirection_e
     int16_t landHeading1;  // Primary landing heading (if approachDirection requires it) | units: degrees
     int16_t landHeading2;  // Secondary landing heading (if approachDirection requires it) | units: degrees
     uint8_t isSeaLevelRef;  // 1 if altitudes are relative to sea level, 0 if relative to home | units: Boolean
@@ -2724,11 +2752,11 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration for a specific Fixed Wing Autoland approach.
 // Notes: Requires `USE_FW_AUTOLAND`. Expects 15 bytes. Returns error if index invalid.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t approachIndex;  // Index of the approach setting (0 to `MAX_FW_LAND_APPOACH_SETTINGS - 1`) | units: Index
     int32_t approachAlt;  // Signed approach altitude (`navFwAutolandApproach_t.approachAlt`) | units: cm
     int32_t landAlt;  // Signed landing altitude (`navFwAutolandApproach_t.landAlt`) | units: cm
-    fwAutolandApproachDirection_e approachDirection;  // Enum `fwAutolandApproachDirection_e` Sets approach direction | units: Enum | Enum: fwAutolandApproachDirection_e
+    uint8_t approachDirection;  // Enum `fwAutolandApproachDirection_e` Sets approach direction | units: Enum | Enum: fwAutolandApproachDirection_e
     int16_t landHeading1;  // Sets primary landing heading | units: degrees
     int16_t landHeading2;  // Sets secondary landing heading | units: degrees
     uint8_t isSeaLevelRef;  // Sets altitude reference | units: Boolean
@@ -2738,7 +2766,7 @@ typedef struct __attribute__((packed)) {
 // Sends a raw command directly to a U-Blox GPS module connected to the FC.
 // Notes: Requires GPS feature enabled (`FEATURE_GPS`) and the GPS driver to be U-Blox (`isGpsUblox()`). Payload must be at least 8 bytes (minimum UBX frame size). Use with extreme caution, incorrect commands can misconfigure the GPS module. Calls `gpsUbloxSendCommand()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t ubxCommand[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Raw U-Blox UBX protocol command frame (including header, class, ID, length, payload, checksum)
 } MSP2_INAV_GPS_UBLOX_COMMAND_request_t;
 
@@ -2746,7 +2774,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves Rate Dynamics configuration parameters for the current control rate profile.
 // Notes: Requires `USE_RATE_DYNAMICS`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t sensitivityCenter;  // Sensitivity at stick center (`currentControlRateProfile->rateDynamics.sensitivityCenter`) | units: %
     uint8_t sensitivityEnd;  // Sensitivity at stick ends (`currentControlRateProfile->rateDynamics.sensitivityEnd`) | units: %
     uint8_t correctionCenter;  // Correction strength at stick center (`currentControlRateProfile->rateDynamics.correctionCenter`) | units: %
@@ -2759,7 +2787,7 @@ typedef struct __attribute__((packed)) {
 // Sets Rate Dynamics configuration parameters for the current control rate profile.
 // Notes: Requires `USE_RATE_DYNAMICS`. Expects 6 bytes.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t sensitivityCenter;  // Sets sensitivity at center | units: %
     uint8_t sensitivityEnd;  // Sets sensitivity at ends | units: %
     uint8_t correctionCenter;  // Sets correction at center | units: %
@@ -2772,7 +2800,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the current EZ-Tune parameters.
 // Notes: Requires `USE_EZ_TUNE`. Calls `ezTuneUpdate()` before sending.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t enabled;  // Boolean: 1 if EZ-Tune is enabled (`ezTune()->enabled`)
     uint16_t filterHz;  // Filter frequency used during tuning (`ezTune()->filterHz`)
     uint8_t axisRatio;  // Roll vs Pitch axis tuning ratio (`ezTune()->axisRatio`)
@@ -2789,7 +2817,7 @@ typedef struct __attribute__((packed)) {
 // Sets the EZ-Tune parameters and triggers an update.
 // Notes: Requires `USE_EZ_TUNE`. Expects 10 or 11 bytes. Calls `ezTuneUpdate()` after setting parameters.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t enabled;  // Sets enabled state
     uint16_t filterHz;  // Sets filter frequency
     uint8_t axisRatio;  // Sets axis ratio
@@ -2806,7 +2834,7 @@ typedef struct __attribute__((packed)) {
 // Selects the active mixer profile and saves configuration.
 // Notes: Expects 1 byte. Will fail if armed. Calls `setConfigMixerProfileAndWriteEEPROM()`. Only applicable if `MAX_MIXER_PROFILE_COUNT` > 1.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t mixerProfileIndex;  // Index of the mixer profile to activate (0-based)
 } MSP2_INAV_SELECT_MIXER_PROFILE_request_t;
 
@@ -2814,7 +2842,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves the list of currently tracked ADSB (Automatic Dependent Surveillance–Broadcast) vehicles. See `adsbVehicle_t` and `adsbVehicleValues_t` in `io/adsb.h` for the exact structure fields.
 // Notes: Requires `USE_ADSB`. Only a subset of `adsbVehicle_t` is transmitted (callsign, core values, heading in whole degrees, TSLC, emitter type, TTL).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t maxVehicles;  // Maximum number of vehicles tracked (`MAX_ADSB_VEHICLES`). 0 if `USE_ADSB` disabled
     uint8_t callsignLength;  // Maximum length of callsign string (`ADSB_CALL_SIGN_MAX_LENGTH`). 0 if `USE_ADSB` disabled
     uint32_t totalVehicleMsgs;  // Total vehicle messages received (`getAdsbStatus()->vehiclesMessagesTotal`). 0 if `USE_ADSB` disabled
@@ -2836,7 +2864,7 @@ typedef struct __attribute__((packed)) {
 // Retrieves counts related to custom OSD elements defined by the programming framework.
 // Notes: Requires `USE_PROGRAMMING_FRAMEWORK`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t maxElements;  // Maximum number of custom elements (`MAX_CUSTOM_ELEMENTS`)
     uint8_t maxTextLength;  // Maximum length of the text part (`OSD_CUSTOM_ELEMENT_TEXT_SIZE - 1`)
     uint8_t maxParts;  // Maximum number of parts per element (`CUSTOM_ELEMENTS_PARTS`)
@@ -2846,16 +2874,16 @@ typedef struct __attribute__((packed)) {
 // Gets the configuration of a single custom OSD element defined by the programming framework.
 // Notes: Reply emitted only if idx < MAX_CUSTOM_ELEMENTS; otherwise no body is written.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t elementIndex;  // Index of the custom element (0 to `MAX_CUSTOM_ELEMENTS - 1`)
 } MSP2_INAV_CUSTOM_OSD_ELEMENT_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     struct MSP_PACKED {
-    osdCustomElementType_e partType;  // Type of this part | Enum: osdCustomElementType_e
+    uint8_t partType;  // Type of this part | Enum: osdCustomElementType_e
     uint16_t partValue;  // Value/ID associated with this part
     } items[CUSTOM_ELEMENTS_PARTS];  // repeating: CUSTOM_ELEMENTS_PARTS
-    osdCustomElementTypeVisibility_e visibilityType;  // Visibility condition source | Enum: osdCustomElementTypeVisibility_e
+    uint8_t visibilityType;  // Visibility condition source | Enum: osdCustomElementTypeVisibility_e
     uint16_t visibilityValue;  // Value/ID of the visibility condition source
     char elementText[OSD_CUSTOM_ELEMENT_TEXT_SIZE - 1];  // Static text bytes | length via OSD_CUSTOM_ELEMENT_TEXT_SIZE - 1
 } MSP2_INAV_CUSTOM_OSD_ELEMENT_reply_t;
@@ -2864,31 +2892,41 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration of one custom OSD element.
 // Notes: Payload length must be (OSD_CUSTOM_ELEMENT_TEXT_SIZE - 1) + (CUSTOM_ELEMENTS_PARTS * 3) + 4 bytes including elementIndex. elementIndex must be < MAX_CUSTOM_ELEMENTS. Each partType must be < CUSTOM_ELEMENT_TYPE_END. Firmware NUL-terminates elementText internally.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t elementIndex;  // Index of the custom element (0 to `MAX_CUSTOM_ELEMENTS - 1`)
     struct MSP_PACKED {
-    osdCustomElementType_e partType;  // Type of this part | Enum: osdCustomElementType_e
+    uint8_t partType;  // Type of this part | Enum: osdCustomElementType_e
     uint16_t partValue;  // Value/ID associated with this part
     } items[CUSTOM_ELEMENTS_PARTS];  // repeating: CUSTOM_ELEMENTS_PARTS
-    osdCustomElementTypeVisibility_e visibilityType;  // Visibility condition source | Enum: osdCustomElementTypeVisibility_e
+    uint8_t visibilityType;  // Visibility condition source | Enum: osdCustomElementTypeVisibility_e
     uint16_t visibilityValue;  // Value/ID of the visibility condition source
     char elementText[OSD_CUSTOM_ELEMENT_TEXT_SIZE - 1];  // Raw bytes | length via OSD_CUSTOM_ELEMENT_TEXT_SIZE - 1
 } MSP2_INAV_SET_CUSTOM_OSD_ELEMENTS_request_t;
+
+// MSP2_INAV_GET_LINK_STATS (MSPv2)
+// Provides uplink RC link statistics for monitoring on a GCS.
+// Notes: Useful for GCS monitoring of the active RC link quality and signal margin.
+
+typedef struct MSP_PACKED {
+    uint8_t uplinkRSSI_dBm;  // Uplink RSSI in dBm, sent as a positive magnitude (`getRSSI()`). For example, 70 means -70dBm. | units: -dBm
+    uint8_t uplinkLQ;  // Uplink Link Quality (`rxLinkStatistics.uplinkLQ`) | units: %
+    int8_t uplinkSNR;  // Uplink Signal-to-Noise Ratio (`rxLinkStatistics.uplinkSNR`) | units: dB
+} MSP2_INAV_GET_LINK_STATS_reply_t;
 
 // MSP2_INAV_OUTPUT_MAPPING_EXT2 (MSPv2)
 // Retrieves the full extended output mapping configuration (timer ID, full 32-bit usage flags, and pin label). Supersedes `MSP2_INAV_OUTPUT_MAPPING_EXT`.
 // Notes: Provides complete usage flags and helps identify pins repurposed for functions like LED strip.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t timerId;  // Hardware timer identifier (e.g., `TIM1`, `TIM2`). SITL uses index
     uint32_t usageFlags;  // Full 32-bit timer usage flags (`TIM_USE_*`)
-    pinLabel_e pinLabel;  // Label for special pin usage (`PIN_LABEL_*` enum, e.g., `PIN_LABEL_LED`). 0 (`PIN_LABEL_NONE`) otherwise | Enum: pinLabel_e
+    uint8_t pinLabel;  // Label for special pin usage (`PIN_LABEL_*` enum, e.g., `PIN_LABEL_LED`). 0 (`PIN_LABEL_NONE`) otherwise | Enum: pinLabel_e
 } MSP2_INAV_OUTPUT_MAPPING_EXT2_reply_t;
 
 // MSP2_INAV_SERVO_CONFIG (MSPv2)
 // Retrieves the configuration parameters for all supported servos (min, max, middle, rate). Supersedes `MSP_SERVO_CONFIGURATIONS`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t min;  // Minimum servo endpoint (`servoParams(i)->min`) | units: PWM
     int16_t max;  // Maximum servo endpoint (`servoParams(i)->max`) | units: PWM
     int16_t middle;  // Middle/Neutral servo position (`servoParams(i)->middle`) | units: PWM
@@ -2899,7 +2937,7 @@ typedef struct __attribute__((packed)) {
 // Sets the configuration parameters for a single servo. Supersedes `MSP_SET_SERVO_CONFIGURATION`.
 // Notes: Expects 8 bytes. Returns error if index invalid. Calls `servoComputeScalingFactors()`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t servoIndex;  // Index of the servo to configure (0 to `MAX_SUPPORTED_SERVOS - 1`) | units: Index
     int16_t min;  // Sets minimum servo endpoint | units: PWM
     int16_t max;  // Sets maximum servo endpoint | units: PWM
@@ -2911,18 +2949,18 @@ typedef struct __attribute__((packed)) {
 // Get configuration for a specific Geozone.
 // Notes: Requires `USE_GEOZONE`. Used by `mspFcGeozoneOutCommand`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t geozoneIndex;  // Index of the geozone (0 to `MAX_GEOZONES_IN_CONFIG - 1`)
 } MSP2_INAV_GEOZONE_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t geozoneIndex;  // Index requested
     uint8_t type;  // Define (`GEOZONE_TYPE_EXCLUSIVE/INCLUSIVE`): Zone type (Inclusion/Exclusion)
     uint8_t shape;  // Define (`GEOZONE_SHAPE_CIRCULAR/POLYGON`): Zone shape (Polygon/Circular)
     int32_t minAltitude;  // Minimum allowed altitude within the zone (`geoZonesConfig(idx)->minAltitude`) | units: cm
     int32_t maxAltitude;  // Maximum allowed altitude within the zone (`geoZonesConfig(idx)->maxAltitude`) | units: cm
     uint8_t isSeaLevelRef;  // Boolean: 1 if altitudes are relative to sea level, 0 if relative to home
-    fenceAction_e fenceAction;  // Enum (`fenceAction_e`): Action to take upon boundary violation | Enum: fenceAction_e
+    uint8_t fenceAction;  // Enum (`fenceAction_e`): Action to take upon boundary violation | Enum: fenceAction_e
     uint8_t vertexCount;  // Number of vertices defined for this zone
 } MSP2_INAV_GEOZONE_reply_t;
 
@@ -2930,14 +2968,14 @@ typedef struct __attribute__((packed)) {
 // Sets the main configuration for a specific Geozone (type, shape, altitude, action). **This command resets (clears) all vertices associated with the zone.**
 // Notes: Requires `USE_GEOZONE`. Expects 14 bytes. Returns error if index invalid. Calls `geozoneResetVertices()`. Vertices must be set subsequently using `MSP2_INAV_SET_GEOZONE_VERTEX`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t geozoneIndex;  // Index of the geozone (0 to `MAX_GEOZONES_IN_CONFIG - 1`)
     uint8_t type;  // Define (`GEOZONE_TYPE_EXCLUSIVE/INCLUSIVE`): Zone type (Inclusion/Exclusion)
     uint8_t shape;  // Define (`GEOZONE_SHAPE_CIRCULAR/POLYGON`): Zone shape (Polygon/Circular)
     int32_t minAltitude;  // Minimum allowed altitude (`geoZonesConfigMutable()->minAltitude`) | units: cm
     int32_t maxAltitude;  // Maximum allowed altitude (`geoZonesConfigMutable()->maxAltitude`) | units: cm
     uint8_t isSeaLevelRef;  // Boolean: Altitude reference
-    fenceAction_e fenceAction;  // Enum (`fenceAction_e`): Action to take upon boundary violation | Enum: fenceAction_e
+    uint8_t fenceAction;  // Enum (`fenceAction_e`): Action to take upon boundary violation | Enum: fenceAction_e
     uint8_t vertexCount;  // Number of vertices to be defined (used for validation later)
 } MSP2_INAV_SET_GEOZONE_request_t;
 
@@ -2945,12 +2983,12 @@ typedef struct __attribute__((packed)) {
 // Get a specific vertex (or center+radius for circular zones) of a Geozone.
 // Notes: Requires `USE_GEOZONE`. Returns error if indexes are invalid or vertex doesn't exist. For circular zones, the radius is stored internally as the 'latitude' of the vertex with index 1.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t geozoneIndex;  // Index of the geozone
     uint8_t vertexId;  // Index of the vertex within the zone (0-based). For circles, 0 = center
 } MSP2_INAV_GEOZONE_VERTEX_request_t;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t geozoneIndex;  // Geozone index requested | units: Index
     uint8_t vertexId;  // Vertex index requested | units: Index
     int32_t latitude;  // Vertex latitude | units: deg * 1e7
@@ -2962,14 +3000,14 @@ typedef struct __attribute__((packed)) {
 // Sets a specific vertex (or center+radius for circular zones) for a Geozone.
 // Notes: Requires `USE_GEOZONE`. Expects 10 bytes (Polygon) or 14 bytes (Circular). Returns error if indexes invalid or if trying to set vertex beyond `vertexCount` defined in `MSP2_INAV_SET_GEOZONE`. Calls `geozoneSetVertex()`. For circular zones, sets center (vertex 0) and radius (vertex 1's latitude).
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t geozoneIndex;  // Geozone index requested | units: Index
     uint8_t vertexId;  // Vertex index requested | units: Index
     int32_t latitude;  // Vertex latitude | units: deg * 1e7
     int32_t longitude;  // Vertex longitude | units: deg * 1e7
 } MSP2_INAV_SET_GEOZONE_VERTEX_request_t_polygon;
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t geozoneIndex;  // Geozone index requested | units: Index
     uint8_t vertexId;  // Vertex index requested | units: Index
     int32_t latitude;  // Vertex/Center latitude | units: deg * 1e7
@@ -2981,16 +3019,97 @@ typedef struct __attribute__((packed)) {
 // Sets the specified Global Variable (GVAR) to the provided value.
 // Notes: Requires `USE_PROGRAMMING_FRAMEWORK`. Expects 5 bytes. Returns error if index is outside `MAX_GLOBAL_VARIABLES`.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     uint8_t gvarIndex;  // Index of the Global Variable to set | units: Index
     int32_t value;  // New value to store (clamped to configured min/max by `gvSet()`)
 } MSP2_INAV_SET_GVAR_request_t;
+
+// MSP2_INAV_SET_ALT_TARGET (MSPv2)
+// Set the active altitude hold target using updateClimbRateToAltitudeController.
+// Notes: Set new altitude target. Requires 5-byte payload (datum + target) and is set-only. Valid only in NAV or ALTHOLD modes. Command is rejected unless altitude control is active, not landing/emergency landing, altitude estimation is valid, and datum is supported (MSL requires valid GPS origin; TERRAIN is reserved and rejected).
+
+typedef struct MSP_PACKED {
+    uint8_t altitudeDatum;  // Altitude reference datum flag (`geoAltitudeDatumFlag_e`): `NAV_WP_TAKEOFF_DATUM` (default), `NAV_WP_MSL_DATUM`, `NAV_WP_TERRAIN_DATUM` and `NAV_WP_RELATIVE_DATUM` (not implemented yet) | Enum: geoAltitudeDatumFlag_e
+    int32_t altitudeTarget;  // Desired altitude target according to reference datum | units: cm
+} MSP2_INAV_SET_ALT_TARGET_request_t;
+
+// MSP2_INAV_FLIGHT_AXIS_ANGLE_OVERRIDE (MSPv2)
+// Enables or disables a flight-axis angle override for the selected axis.
+// Notes: Uses the same override path as logic conditions and bypasses stick-derived angle targets.
+
+typedef struct MSP_PACKED {
+    uint8_t overrideMask;  // Bitmask of desired-state fields that follow (Roll, Pitch, Yaw). Non-zero enables the override; zero disables it for that axis. | units: Bitmask
+    int16_t angleTargetRoll;  // Angle target in deci-degrees. Roll/Pitch clamped to configured angle limits | units: deci-degrees
+    int16_t angleTargetPitch;  // Angle target in deci-degrees. Roll/Pitch clamped to configured angle limits | units: deci-degrees
+    int16_t angleTargetYaw;  // Angle target in deci-degrees. Yaw clamped to 0–3600. | units: deci-degrees
+} MSP2_INAV_FLIGHT_AXIS_ANGLE_OVERRIDE_request_t;
+
+// MSP2_INAV_FLIGHT_AXIS_RATE_OVERRIDE (MSPv2)
+// Enables or disables a flight-axis rate override for the selected axis.
+// Notes: Expects 7 bytes. Overrides rate targets just before control is applied, bypassing stick-derived setpoints.
+
+typedef struct MSP_PACKED {
+    uint8_t overrideMask;  // Bitmask of desired-state fields that follow (Roll, Pitch, Yaw). Non-zero enables the override; zero disables it for that axis. | units: Bitmask
+    int16_t rateTargetRoll;  // Rate target, clamped to ±2000 | units: deg/s
+    int16_t rateTargetPitch;  // Rate target, clamped to ±2000 | units: deg/s
+    int16_t rateTargetYaw;  // Rate target, clamped to ±2000 | units: deg/s
+} MSP2_INAV_FLIGHT_AXIS_RATE_OVERRIDE_request_t;
+
+// MSP2_INAV_SET_LOCAL_TARGET (MSPv2)
+// Sets a body-frame offset target relative to the current vehicle position.
+// Notes: Offsets are in the vehicle body frame (forward/right/up, cm) and are rotated into the NEU frame using the current yaw, applied relative to current position. Z offset is always provided; Z=0 keeps current altitude, non-zero offsets are relative to current altitude. Requires GCSNAV/offboard to be active and a valid guided poshold; updates the navigation desired position via `setDesiredPosition()`.
+
+typedef struct MSP_PACKED {
+    int32_t posX;  // Desired X in local NEU frame | units: cm
+    int32_t posY;  // Desired Y in local NEU frame | units: cm
+    int32_t posZ;  // Desired Z in local NEU frame (up-positive). Omit this field to leave Z unchanged. | units: cm
+} MSP2_INAV_SET_LOCAL_TARGET_request_t;
+
+// MSP2_INAV_LOCAL_TARGET (MSPv2)
+// Returns the current navigation desired state (position, velocity, yaw, and climb rate).
+// Notes: Local frame is NEU. Mirrors `posControl.desiredState` (position, velocity, yaw, climb rate) used by the position controller.
+
+typedef struct MSP_PACKED {
+    int32_t posX;  // Desired X in local NEU frame (`posControl.desiredState.pos.x`) | units: cm
+    int32_t posY;  // Desired Y in local NEU frame (`posControl.desiredState.pos.y`) | units: cm
+    int32_t posZ;  // Desired Z in local NEU frame (`posControl.desiredState.pos.z`, up-positive) | units: cm
+    int16_t velX;  // Desired X velocity (`posControl.desiredState.vel.x`) | units: cm/s
+    int16_t velY;  // Desired Y velocity (`posControl.desiredState.vel.y`) | units: cm/s
+    int16_t velZ;  // Desired Z velocity (`posControl.desiredState.vel.z`) | units: cm/s
+    int32_t yaw;  // Desired heading (`posControl.desiredState.yaw`) | units: centi-degrees
+    int16_t climbRate;  // Desired climb rate demand (`posControl.desiredState.climbRateDemand`) | units: cm/s
+} MSP2_INAV_LOCAL_TARGET_reply_t;
+
+// MSP2_INAV_SET_GLOBAL_TARGET (MSPv2)
+// Sets desired GCS Nav position with global coordinates (WP 254/GOTO).
+// Notes: Uses the GCSNAV/offboard path; rejected when GCSNAV is not active. Rejects `NAV_WP_TERRAIN_DATUM`; other datums are converted to local NEU and applied through `setDesiredPosition()`. Altitude of 0 leaves current Z unchanged. Existing 13-byte payloads are still accepted; 17-byte payloads append `loiterRadius`, where `0` clears the temporary override and non-zero values are centimeters.
+
+typedef struct MSP_PACKED {
+    int32_t latitude;  // Latitude coordinate | units: deg * 1e7
+    int32_t longitude;  // Longitude coordinate | units: deg * 1e7
+    int32_t altitudeTarget;  // Desired altitude target according to reference datum (0 keeps current altitude) | units: cm
+    uint8_t altitudeDatum;  // Altitude reference datum flag (`geoAltitudeDatumFlag_e`): `NAV_WP_TAKEOFF_DATUM`, `NAV_WP_MSL_DATUM`, `NAV_WP_TERRAIN_DATUM` (not implemented yet) | Enum: geoAltitudeDatumFlag_e
+    int32_t loiterRadius;  // Optional temporary fixed-wing PosHold loiter radius override. Appended field; omit to leave unchanged. `0` clears the override and uses `navConfig()->fw.loiter_radius`. | units: cm
+} MSP2_INAV_SET_GLOBAL_TARGET_request_t;
+
+// MSP2_INAV_NAV_TARGET (MSPv2)
+// Returns the current navigation desired global target (lat/lon/alt, heading, climb rate).
+// Notes: Altitude target is reported in the takeoff datum frame (local Z). Heading is sourced from the heading-hold target. Intended for monitoring the active navigation desired target (Goto/Followme/RTH/Safehome). The appended `loiterRadius` reports the temporary override only; `0` means the configured default is active.
+
+typedef struct MSP_PACKED {
+    int32_t latTarget;  // Latitude in degrees * 1e7 | units: 1e-7 deg
+    int32_t lonTarget;  // Longitude in degrees * 1e7 | units: 1e-7 deg
+    int32_t altitudeTarget;  // Desired altitude target (takeoff datum, cm) as used by altitude/position hold | units: cm
+    uint16_t headingTarget;  // Current heading-hold target (`getHeadingHoldTarget()`), wrapped to 0–359.99 | units: degrees
+    int16_t climbRate;  // Desired climb rate demand (`posControl.desiredState.climbRateDemand`) | units: cm/s
+    uint32_t loiterRadius;  // Temporary fixed-wing PosHold loiter radius override. `0` means no override; the configured `navConfig()->fw.loiter_radius` is used. | units: cm
+} MSP2_INAV_NAV_TARGET_reply_t;
 
 // MSP2_INAV_FULL_LOCAL_POSE (MSPv2)
 // Provides estimates of current attitude, local NEU position, and velocity.
 // Notes: All attitude angles are in deci-degrees.
 
-typedef struct __attribute__((packed)) {
+typedef struct MSP_PACKED {
     int16_t roll;  // Roll angle (`attitude.values.roll`) | units: deci-degrees
     int16_t pitch;  // Pitch angle (`attitude.values.pitch`) | units: deci-degrees
     int16_t yaw;  // Yaw/Heading angle (`attitude.values.yaw`) | units: deci-degrees
@@ -3002,11 +3121,75 @@ typedef struct __attribute__((packed)) {
     int16_t localVelocityUp;  // Estimated Up component of velocity in local NEU frame (`posControl.actualState.abs.vel.z`) | units: cm/s
 } MSP2_INAV_FULL_LOCAL_POSE_reply_t;
 
+// MSP2_INAV_SET_WP_INDEX (MSPv2)
+// Jumps to a specific waypoint during an active waypoint mission, causing the aircraft to immediately begin navigating toward the new target waypoint.
+// Notes: Returns error if the aircraft is not armed, `NAV_WP_MODE` is not active, or the index is outside the valid mission range (`startWpIndex` to `startWpIndex + waypointCount - 1`). On success, sets `posControl.activeWaypointIndex` to the requested index and fires `NAV_FSM_EVENT_SWITCH_TO_WAYPOINT_JUMP`, transitioning the navigation FSM back to `NAV_STATE_WAYPOINT_PRE_ACTION` so the flight controller re-initialises navigation for the new target.
+
+typedef struct MSP_PACKED {
+    uint8_t wp_index;  // 0-based waypoint index to jump to, relative to the mission start waypoint (`posControl.startWpIndex`) | units: -
+} MSP2_INAV_SET_WP_INDEX_request_t;
+
+// MSP2_INAV_SET_CRUISE_HEADING (MSPv2)
+// Sets the course heading target while Cruise or Course Hold mode is active, causing the aircraft to turn to and maintain the new heading.
+// Notes: Returns error if the aircraft is not armed or `NAV_COURSE_HOLD_MODE` is not active. On success, sets both `posControl.cruise.course` and `posControl.cruise.previousCourse` to the normalised value, preventing spurious heading adjustments from `getCruiseHeadingAdjustment()` on the next control cycle.
+
+typedef struct MSP_PACKED {
+    int32_t heading_centidegrees;  // Target heading in centidegrees (0-35999). Values are wrapped modulo 36000 before being applied. | units: centidegrees
+} MSP2_INAV_SET_CRUISE_HEADING_request_t;
+
+// MSP2_INAV_ACTIVATE_LANDING (MSPv2)
+// Commands an immediate normal landing at the current position.
+// Notes: Requires the aircraft to be armed with usable position, altitude, and heading estimates. Creates a transient LAND waypoint at the current position without changing the uploaded mission, then enters the normal `NAV_STATE_WAYPOINT_RTH_LAND` path. This is not emergency landing.
+
+// MSP2_INAV_ACTIVATE_RTH (MSPv2)
+// Commands the aircraft to execute its configured return-to-home sequence.
+// Notes: Requires the aircraft to be armed. Enters normal return-to-home mode through the same mode selector path as RC RTH, without setting the failsafe/geozone forced-RTH latch.
+
+// MSP2_INAV_ARM_DISARM (MSPv2)
+// Arms or disarms the flight controller using the normal FC arming path.
+// Notes: Returns an error for values other than 0 or 1, or when the requested armed state is not reached.
+
+typedef struct MSP_PACKED {
+    uint8_t arm;  // Requested armed state: 0 disarms, 1 arms through the normal arming checks. | units: Boolean
+} MSP2_INAV_ARM_DISARM_request_t;
+
+// MSP2_INAV_TIMESYNC (MSPv2)
+// Returns the local monotonic boot time in nanoseconds.
+// Notes: The value is little-endian like other MSP integer fields and uses the same boot-time clock returned by MAVLink `TIMESYNC`.
+
+typedef struct MSP_PACKED {
+    uint64_t timeNs;  // Monotonic flight-controller boot time, calculated as `(uint64_t)micros() * 1000`. | units: ns
+} MSP2_INAV_TIMESYNC_reply_t;
+
+// MSP2_INAV_SET_AUX_RC (MSPv2)
+// Bandwidth-efficient auxiliary RC channel update. Sets CH13-CH32 with configurable resolution (2/4/8/16-bit) without affecting primary flight controls. Designed for extending channel count beyond native RC link capacity via MSP passthrough.
+// Notes: CH1-CH12 (index 0-11) are protected and will return `MSP_RESULT_ERROR`. Payload size must be 2-49 bytes. Constraint: `startChannel + channelCount <= 32`. Values persist until overwritten; no timeout. Applied as a post-RX overlay in `calculateRxChannelsAndUpdateFailsafe()` after MSP RC Override but before failsafe. Does not require `USE_RX_MSP` or MSP-RC-OVERRIDE flight mode. Does not affect failsafe detection. When MSP is the primary RX provider, channels covered by `MSP_SET_RAW_RC` are automatically skipped. Channels in the `mspOverrideChannels` bitmask are skipped when MSP RC Override mode is active. Recommended to send with `MSP_FLAG_DONT_REPLY` (flags=0x01) to save bandwidth on telemetry passthrough links. 16-bit mode requires even number of data bytes and values are clamped to 750-2250us.
+
+typedef struct MSP_PACKED {
+    uint8_t definitionByte;  // Packed start channel and resolution. Bits 7-3: start channel index (valid range 12-31 for CH13-CH32; 0-11 rejected as error). Bits 2-0: resolution mode (0=2-bit, 1=4-bit, 2=8-bit, 3=16-bit; 4-7 reserved/error).
+    uint8_t channelData[UNDEFINED_LEN_ARRAY_PLACEHOLDER];  // Packed channel values, sequential from start channel. Number of channels is derived from data size and resolution. Value 0 means skip (no update). Sub-byte modes (2-bit, 4-bit) are packed MSB-first. 2-bit values 1-3 map to 1000/1500/2000us. 4-bit values 1-15 map to 1000 + (val-1)*1000/14 us. 8-bit values 1-255 map to 1000 + (val-1)*1000/254 us. 16-bit values are direct PWM, clamped to 750-2250us. | units: PWM (encoded)
+} MSP2_INAV_SET_AUX_RC_request_t;
+
 // MSP2_BETAFLIGHT_BIND (MSPv2)
 // Initiates the receiver binding procedure for supported serial protocols (CRSF, SRXL2).
 // Notes: Requires `rxConfig()->receiverType == RX_TYPE_SERIAL`. Requires `USE_SERIALRX_CRSF` or `USE_SERIALRX_SRXL2`. Calls `crsfBind()` or `srxl2Bind()` respectively. Returns error if receiver type or provider is not supported for binding.
+
+// MSP2_RX_BIND (MSPv2)
+// Initiates binding for MSP receivers (mLRS).
+// Notes: Requires a receiver using MSP as the protocol, sends MSP2_RX_BIND to the receiver.
+
+typedef struct MSP_PACKED {
+    uint8_t port_id;  // Port ID
+    uint8_t reserved_for_custom_use[3];  // Reserved for custom use
+} MSP2_RX_BIND_request_t;
+
+typedef struct MSP_PACKED {
+    uint8_t port_id;  // Port ID
+    uint8_t reserved_for_custom_use[3];  // Reserved for custom use
+} MSP2_RX_BIND_reply_t;
 
 
 #if defined(_MSC_VER)
 #  pragma pack(pop)
 #endif
+#undef MSP_PACKED

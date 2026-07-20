@@ -8,7 +8,6 @@ Usage:
 import argparse
 import json
 import re
-import sys
 from pathlib import Path
 
 CTYPE_MAP = {
@@ -57,21 +56,6 @@ def field_decl(entry: dict, suffix_comment: str = "") -> str:
     array_size_define = (entry.get("array_size_define") or "").strip()
     ctype_raw = (entry.get("ctype") or "").strip()
 
-    def pick_base(default: str) -> str:
-        if enum_t and default in (
-            "uint8_t",
-            "int8_t",
-            "uint16_t",
-            "int16_t",
-            "uint32_t",
-            "int32_t",
-            "uint64_t",
-            "int64_t",
-            "",
-        ):
-            return enum_t
-        return default
-
     if ctype_raw == "Varies":
         basetype = "uint8_t"
         declarator = f"{name}[UNDEFINED_LEN_ARRAY_PLACEHOLDER]"
@@ -86,7 +70,7 @@ def field_decl(entry: dict, suffix_comment: str = "") -> str:
         return f"    {basetype} {declarator};{cmt}"
 
     if array_flag:
-        base = pick_base(CTYPE_MAP.get(ctype_raw, ctype_raw))
+        base = CTYPE_MAP.get(ctype_raw, ctype_raw)
         if array_size_define != "":
             declarator = f"{name}[{array_size_define}]"
         elif isinstance(array_size, int) and array_size > 0:
@@ -96,7 +80,7 @@ def field_decl(entry: dict, suffix_comment: str = "") -> str:
         basetype = base
     else:
         base_raw, size = split_ctype(ctype_raw)
-        base = pick_base(base_raw)
+        base = base_raw
         if size is None:
             basetype, declarator = base, name
         elif size == "":
@@ -104,7 +88,7 @@ def field_decl(entry: dict, suffix_comment: str = "") -> str:
         else:
             basetype, declarator = base, f"{name}[{size}]"
 
-    if not enum_t and basetype not in PRIMITIVES and not basetype.endswith("_e") and basetype not in ("boxBitmask_t",):
+    if basetype not in PRIMITIVES and basetype not in ("boxBitmask_t",):
         USED_TYPES.add(basetype)
 
     cmts = []
@@ -129,7 +113,6 @@ def emit_header_preamble():
 #include <stdint.h>
 #include "msp_protocol.h"
 #include "msp_types.h"
-#include "all_enums.h"
 
 #if !defined(MSP_PROTOCOL_VERSION)
 # error "msp_protocol.h must be present and define protocol macros"
@@ -155,12 +138,13 @@ def emit_header_postamble():
 #if defined(_MSC_VER)
 #  pragma pack(pop)
 #endif
+#undef MSP_PACKED
 """
 
 
 def emit_struct(name: str, payload: list, parent_msg: dict) -> str:
     lines = []
-    lines.append(f"typedef struct __attribute__((packed)) {{")
+    lines.append("typedef struct MSP_PACKED {")
 
     for ent in payload:
         if isinstance(ent, dict) and ent.get("repeating") and "payload" in ent:
@@ -216,9 +200,12 @@ def main():
     parser = argparse.ArgumentParser(description="Generate MSP C header from schema JSON.")
     parser.add_argument("schema", help="Path to msp_messages.json")
     parser.add_argument("-o", "--out", default="msp_messages.h", help="Output header path (default: msp_messages.h)")
+    parser.add_argument("--needed-types", help="Optional output path for referenced support types")
     args = parser.parse_args()
 
-    data = json.loads(Path(args.schema).read_text())
+    root = json.loads(Path(args.schema).read_text())
+    data = root["messages"] if "messages" in root else root
+    USED_TYPES.clear()
     out = []
     out.append(emit_header_preamble())
 
@@ -257,12 +244,13 @@ def main():
             out.append(emit_struct(base_struct, reply["payload"], msg))
 
     out.append(emit_header_postamble())
-    Path(args.out).write_text("\n".join(out))
+    output_path = Path(args.out)
+    temporary = output_path.with_suffix(output_path.suffix + ".tmp")
+    temporary.write_text("\n".join(out))
+    temporary.replace(output_path)
 
-    if USED_TYPES:
-        Path("needed_structs.txt").write_text("\n".join(sorted(USED_TYPES)))
-    else:
-        Path("needed_structs.txt").write_text("")
+    if args.needed_types:
+        Path(args.needed_types).write_text("\n".join(sorted(USED_TYPES)) + "\n")
 
 
 if __name__ == "__main__":

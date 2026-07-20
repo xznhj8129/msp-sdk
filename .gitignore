@@ -3,6 +3,10 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Local quarantine for superseded experiments.
+.old/*
+!.old/README.md
+
 # C extensions
 *.so
 

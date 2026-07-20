@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
-import datetime
+"""
+Collect INAV preprocessor definitions into one annotated header.
+
+Usage:
+    python get_inav_defines.py --inav-root ../inav/src/main --output all_defines.h
+"""
+
+import argparse
+import os
 import re
 from pathlib import Path
 
-BASE = Path('../inav/src/main')
 SUBDIRS = [
     'navigation',
     'sensors',
@@ -13,6 +20,9 @@ SUBDIRS = [
     'io',
     'flight',
     'fc',
+    'drivers',
+    'build',
+    'common',
 ]
 
 def strip_comments(text: str) -> str:
@@ -138,28 +148,43 @@ def extract_defines_with_conditionals(text: str):
 
     return out, defines_count
 
-all_out_lines = []
-total_defines = 0
-file_hits = 0
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Collect INAV preprocessor definitions")
+    parser.add_argument("--inav-root", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
 
-for sd in SUBDIRS:
-    root = BASE / sd
-    if not root.is_dir():
-        continue
-    for fn in root.rglob('*'):
-        if fn.suffix in ('.c', '.h'):
-            txt = fn.read_text(errors='ignore')
-            extracted, count = extract_defines_with_conditionals(txt)
-            if count > 0:
-                file_hits += 1
-                all_out_lines.append(f"\n// {fn}\n")
-                all_out_lines.extend(extracted)
-                if not (all_out_lines and all_out_lines[-1].endswith('\n\n')):
-                    all_out_lines.append('\n')
-                total_defines += count
+    all_out_lines = []
+    total_defines = 0
+    file_hits = 0
 
-with open('all_defines.h', 'w') as out:
-    out.write(f"// Consolidated defines - generated on {datetime.datetime.now()}\n\n")
-    out.writelines(all_out_lines)
+    for subdirectory in SUBDIRS:
+        root = args.inav_root / subdirectory
+        if not root.is_dir():
+            continue
+        for filename in sorted(root.rglob("*")):
+            if filename.suffix not in (".c", ".h"):
+                continue
+            extracted, count = extract_defines_with_conditionals(filename.read_text(errors="ignore"))
+            if count == 0:
+                continue
+            file_hits += 1
+            source = os.path.relpath(filename, args.output.parent)
+            all_out_lines.append(f"\n// {source}\n")
+            all_out_lines.extend(extracted)
+            if not all_out_lines[-1].endswith("\n\n"):
+                all_out_lines.append("\n")
+            total_defines += count
 
-print(f"Found {total_defines} #define entries across {file_hits} files. Wrote all_defines.h.")
+    output = "// Consolidated INAV defines. Generated; do not edit.\n\n" + "".join(all_out_lines)
+    temporary = args.output.with_suffix(args.output.suffix + ".tmp")
+    temporary.write_text(output)
+    temporary.replace(args.output)
+    print(
+        f"Found {total_defines} #define entries across {file_hits} files. "
+        f"Wrote {args.output}."
+    )
+
+
+if __name__ == "__main__":
+    main()

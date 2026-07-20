@@ -1,4 +1,4 @@
-// Fallback stub definitions for MSP support types not present in consolidated headers.
+// MSP wire support types which are not represented by inav_enums.json.
 #pragma once
 #include <stdint.h>
 
@@ -6,12 +6,21 @@
 #define BIT(x) (1U << (x))
 #endif
 
+#if defined(_MSC_VER)
+#pragma pack(push, 1)
+#define MSP_SUPPORT_PACKED
+#else
+#define MSP_SUPPORT_PACKED __attribute__((packed))
+#endif
+
 #ifndef MSP_HAS_ESC_SENSOR_DATA_T
 #define MSP_HAS_ESC_SENSOR_DATA_T
-typedef struct __attribute__((packed)) {
+typedef struct MSP_SUPPORT_PACKED {
     uint8_t dataAge;
+    uint8_t _paddingAfterDataAge;
     int16_t temperature;
     int16_t voltage;
+    uint8_t _paddingBeforeCurrent[2];
     int32_t current;
     uint32_t rpm;
 } escSensorData_t;
@@ -19,50 +28,36 @@ typedef struct __attribute__((packed)) {
 
 #ifndef MSP_HAS_LED_CONFIG_T
 #define MSP_HAS_LED_CONFIG_T
-typedef struct __attribute__((packed)) {
+typedef struct MSP_SUPPORT_PACKED {
     uint8_t raw[6];
 } ledConfig_t;
 #endif
-
-#ifndef MSP_HAS_FW_AUTOTUNE_RATE_ADJUSTMENT_E
-#define MSP_HAS_FW_AUTOTUNE_RATE_ADJUSTMENT_E
-typedef enum {
-    FW_AUTOTUNE_RATE_ADJ_FIXED = 0,
-    FW_AUTOTUNE_RATE_ADJ_LIMIT = 1,
-    FW_AUTOTUNE_RATE_ADJ_AUTO = 2,
-} fw_autotune_rate_adjustment_e;
-#endif
-
 
 #ifndef MSP_HAS_VARIES_T
 #define MSP_HAS_VARIES_T
 typedef uint8_t Varies;
 #endif
 
-#ifndef MSP_HAS_NAV_USER_CONTROL_MODE_E
-#define MSP_HAS_NAV_USER_CONTROL_MODE_E
-typedef uint8_t navUserControlMode_e;
-#endif
-
-#ifndef MSP_HAS_NAV_RTH_ALT_CONTROL_MODE_E
-#define MSP_HAS_NAV_RTH_ALT_CONTROL_MODE_E
-typedef uint8_t navRthAltControlMode_e;
-#endif
-
-#ifndef MSP_HAS_MIXER_PRESET_E
-#define MSP_HAS_MIXER_PRESET_E
-typedef uint16_t mixerPreset_e;
+#ifndef MSP_HAS_DRONECAN_NODE_STATUS_T
+#define MSP_HAS_DRONECAN_NODE_STATUS_T
+typedef struct MSP_SUPPORT_PACKED {
+    uint8_t nodeID;
+    uint8_t health;
+    uint8_t mode;
+    uint32_t last_seen_ms;
+} dronecanNodeStatus_t;
 #endif
 
 #ifndef MSP_HAS_BOXBITMASK_T
 #define MSP_HAS_BOXBITMASK_T
-#ifdef CHECKBOX_ITEM_COUNT
 #define MSP_BOXBITMASK_WORDS ((CHECKBOX_ITEM_COUNT + 31) / 32)
-#else
-#define MSP_BOXBITMASK_WORDS ((60 + 31) / 32)
-#endif
 typedef struct {
     uint32_t bits[MSP_BOXBITMASK_WORDS];
 } boxBitmask_t;
 #undef MSP_BOXBITMASK_WORDS
 #endif
+
+#if defined(_MSC_VER)
+#pragma pack(pop)
+#endif
+#undef MSP_SUPPORT_PACKED
