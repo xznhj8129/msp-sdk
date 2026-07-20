@@ -3,7 +3,7 @@ set -euo pipefail
 
 GENERATOR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SDK_ROOT="$(cd "${GENERATOR_DIR}/.." && pwd)"
-INAV_DIR="${SDK_ROOT}/../inav"
+INAV_DIR=""
 VERBOSE_DEFINES=()
 
 while (($#)); do
@@ -18,6 +18,9 @@ while (($#)); do
             ;;
         -h|--help)
             echo "Usage: ./generator/gen_all.sh [--inav-dir PATH] [--verbose-defines]"
+            echo
+            echo "Without --inav-dir, the SDK-managed INAV checkout at <sdk>/inav is"
+            echo "used, cloning it from the network first if missing (see sync_inav.sh)."
             exit 0
             ;;
         *)
@@ -26,6 +29,13 @@ while (($#)); do
             ;;
     esac
 done
+
+if [[ -z "${INAV_DIR}" ]]; then
+    INAV_DIR="${SDK_ROOT}/inav"
+    if [[ ! -d "${INAV_DIR}/.git" ]]; then
+        "${GENERATOR_DIR}/sync_inav.sh"
+    fi
+fi
 
 INAV_DIR="$(cd "${INAV_DIR}" && pwd)"
 INCLUDE_DIR="${SDK_ROOT}/include"

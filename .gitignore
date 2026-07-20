@@ -4,8 +4,12 @@ __pycache__/
 *$py.class
 
 # Local quarantine for superseded experiments.
+.old/
 .old/*
 !.old/README.md
+
+# SDK-managed INAV checkout (network clone; a build input, never tracked)
+/inav/
 
 # C extensions
 *.so
